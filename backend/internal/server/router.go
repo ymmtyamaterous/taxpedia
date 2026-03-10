@@ -1,0 +1,73 @@
+package server
+
+import (
+	"log"
+	"net/http"
+	"strings"
+)
+
+type Server struct {
+	mux     *http.ServeMux
+	handler http.Handler
+}
+
+func New(allowedOrigins string) *Server {
+	s := &Server{mux: http.NewServeMux()}
+	s.routes()
+	s.handler = withCORS(s.mux, allowedOrigins)
+	return s
+}
+
+func (s *Server) Handler() http.Handler {
+	return s.handler
+}
+
+func (s *Server) routes() {
+	s.mux.HandleFunc("GET /api/health", s.health)
+
+	s.mux.HandleFunc("GET /api/courses", s.getCourses)
+	s.mux.HandleFunc("GET /api/courses/", s.getCourseByID)
+	s.mux.HandleFunc("GET /api/lessons/", s.lessonRoute)
+
+	s.mux.HandleFunc("POST /api/auth/register", s.register)
+	s.mux.HandleFunc("POST /api/auth/login", s.login)
+	s.mux.HandleFunc("GET /api/auth/me", s.me)
+
+	s.mux.HandleFunc("POST /api/quiz/submit", s.submitQuiz)
+	s.mux.HandleFunc("GET /api/users/me/progress", s.userProgress)
+	s.mux.HandleFunc("GET /api/users/me/badges", s.userBadges)
+}
+
+func withCORS(next http.Handler, allowedOrigins string) http.Handler {
+	allowed := strings.Split(allowedOrigins, ",")
+	allowedMap := make(map[string]struct{}, len(allowed))
+	for _, v := range allowed {
+		trimmed := strings.TrimSpace(v)
+		if trimmed != "" {
+			allowedMap[trimmed] = struct{}{}
+		}
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if _, ok := allowedMap[origin]; ok {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+		}
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func writeErr(w http.ResponseWriter, status int, msg string) {
+	w.WriteHeader(status)
+	_, err := w.Write([]byte(`{"error":"` + msg + `"}`))
+	if err != nil {
+		log.Printf("writeErr: %v", err)
+	}
+}

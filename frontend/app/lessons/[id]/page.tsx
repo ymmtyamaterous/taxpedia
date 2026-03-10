@@ -1,0 +1,37 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { Header } from "@/components/header";
+import { lessons } from "@/lib/mock-data";
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function LessonPage({ params }: Props) {
+  const { id } = await params;
+  const lessonId = Number(id);
+  const lesson = lessons.find((item) => item.id === lessonId);
+
+  if (Number.isNaN(lessonId) || !lesson) {
+    notFound();
+  }
+
+  return (
+    <div className="tp-page">
+      <Header />
+      <main className="tp-container tp-article">
+        <h1 className="tp-title">{lesson.title}</h1>
+        <p className="tp-lead">目安: {lesson.estimatedMinutes}分</p>
+        <article>
+          <p>{lesson.content}</p>
+        </article>
+        <div className="tp-actions">
+          <Link href={`/quiz/${lesson.id}`} className="tp-primary-btn">
+            クイズに進む
+          </Link>
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,390 @@
+openapi: 3.0.3
+info:
+	title: Taxpedia API
+	version: 0.1.0
+	description: Taxpedia の初期 API 定義
+servers:
+	- url: http://localhost:8080
+tags:
+	- name: Health
+	- name: Auth
+	- name: Courses
+	- name: Lessons
+	- name: Quiz
+	- name: Users
+paths:
+	/api/health:
+		get:
+			tags: [Health]
+			summary: ヘルスチェック
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/HealthResponse"
+	/api/auth/register:
+		post:
+			tags: [Auth]
+			summary: 会員登録
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema:
+							$ref: "#/components/schemas/RegisterRequest"
+			responses:
+				"201":
+					description: Created
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/AuthResponse"
+	/api/auth/login:
+		post:
+			tags: [Auth]
+			summary: ログイン
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema:
+							$ref: "#/components/schemas/LoginRequest"
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/AuthResponse"
+	/api/auth/me:
+		get:
+			tags: [Auth]
+			summary: ログイン中ユーザー情報
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/User"
+	/api/courses:
+		get:
+			tags: [Courses]
+			summary: コース一覧
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/Course"
+								required: [items]
+	/api/courses/{id}:
+		get:
+			tags: [Courses]
+			summary: コース詳細
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/Course"
+	/api/courses/{id}/lessons:
+		get:
+			tags: [Lessons]
+			summary: コース内レッスン一覧
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/Lesson"
+								required: [items]
+	/api/lessons/{id}:
+		get:
+			tags: [Lessons]
+			summary: レッスン詳細
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/Lesson"
+	/api/lessons/{id}/start:
+		post:
+			tags: [Lessons]
+			summary: レッスン開始（進捗記録）
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+	/api/lessons/{id}/complete:
+		post:
+			tags: [Lessons]
+			summary: レッスン完了（進捗記録）
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+	/api/lessons/{id}/quiz:
+		get:
+			tags: [Quiz]
+			summary: レッスンのクイズ取得
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/QuizQuestion"
+								required: [items]
+	/api/quiz/submit:
+		post:
+			tags: [Quiz]
+			summary: クイズ回答
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema:
+							$ref: "#/components/schemas/QuizSubmitRequest"
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/QuizSubmitResponse"
+	/api/users/me/progress:
+		get:
+			tags: [Users]
+			summary: 学習進捗
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/UserProgressSummary"
+	/api/users/me/badges:
+		get:
+			tags: [Users]
+			summary: 獲得バッジ一覧
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/Badge"
+								required: [items]
+components:
+	securitySchemes:
+		bearerAuth:
+			type: http
+			scheme: bearer
+			bearerFormat: JWT
+	schemas:
+		HealthResponse:
+			type: object
+			properties:
+				status:
+					type: string
+			required: [status]
+		RegisterRequest:
+			type: object
+			properties:
+				email:
+					type: string
+					format: email
+				password:
+					type: string
+					minLength: 8
+				displayName:
+					type: string
+			required: [email, password, displayName]
+		LoginRequest:
+			type: object
+			properties:
+				email:
+					type: string
+					format: email
+				password:
+					type: string
+			required: [email, password]
+		AuthResponse:
+			type: object
+			properties:
+				token:
+					type: string
+				user:
+					$ref: "#/components/schemas/User"
+			required: [token, user]
+		User:
+			type: object
+			properties:
+				id:
+					type: integer
+				email:
+					type: string
+				displayName:
+					type: string
+			required: [id, email, displayName]
+		Course:
+			type: object
+			properties:
+				id:
+					type: integer
+				title:
+					type: string
+				description:
+					type: string
+				level:
+					type: string
+					enum: [beginner, intermediate, advanced]
+			required: [id, title, description, level]
+		Lesson:
+			type: object
+			properties:
+				id:
+					type: integer
+				courseId:
+					type: integer
+				title:
+					type: string
+				content:
+					type: string
+				estimatedMinutes:
+					type: integer
+			required: [id, courseId, title, content, estimatedMinutes]
+		QuizChoice:
+			type: object
+			properties:
+				id:
+					type: integer
+				label:
+					type: string
+				text:
+					type: string
+			required: [id, label, text]
+		QuizQuestion:
+			type: object
+			properties:
+				id:
+					type: integer
+				lessonId:
+					type: integer
+				question:
+					type: string
+				explanation:
+					type: string
+				choices:
+					type: array
+					items:
+						$ref: "#/components/schemas/QuizChoice"
+			required: [id, lessonId, question, explanation, choices]
+		QuizSubmitRequest:
+			type: object
+			properties:
+				questionId:
+					type: integer
+				selectedChoiceId:
+					type: integer
+			required: [questionId, selectedChoiceId]
+		QuizSubmitResponse:
+			type: object
+			properties:
+				correct:
+					type: boolean
+				explanation:
+					type: string
+			required: [correct, explanation]
+		Badge:
+			type: object
+			properties:
+				id:
+					type: integer
+				name:
+					type: string
+				icon:
+					type: string
+			required: [id, name, icon]
+		UserProgressSummary:
+			type: object
+			properties:
+				completedCourses:
+					type: integer
+				streakDays:
+					type: integer
+				earnedBadges:
+					type: integer
+			required: [completedCourses, streakDays, earnedBadges]

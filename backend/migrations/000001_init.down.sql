@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS user_badges;
+DROP TABLE IF EXISTS badges;
+DROP TABLE IF EXISTS user_quiz_results;
+DROP TABLE IF EXISTS user_lesson_progress;
+DROP TABLE IF EXISTS quiz_choices;
+DROP TABLE IF EXISTS quiz_questions;
+DROP TABLE IF EXISTS lessons;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS users;

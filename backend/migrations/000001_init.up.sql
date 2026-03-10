@@ -1,0 +1,77 @@
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  display_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS courses (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  level VARCHAR(20) NOT NULL CHECK (level IN ('beginner', 'intermediate', 'advanced')),
+  order_index INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS lessons (
+  id BIGSERIAL PRIMARY KEY,
+  course_id BIGINT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  estimated_minutes INT NOT NULL DEFAULT 5,
+  order_index INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS quiz_questions (
+  id BIGSERIAL PRIMARY KEY,
+  lesson_id BIGINT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  question_text TEXT NOT NULL,
+  explanation TEXT NOT NULL,
+  order_index INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS quiz_choices (
+  id BIGSERIAL PRIMARY KEY,
+  question_id BIGINT NOT NULL REFERENCES quiz_questions(id) ON DELETE CASCADE,
+  choice_label CHAR(1) NOT NULL,
+  choice_text TEXT NOT NULL,
+  is_correct BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS user_lesson_progress (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id BIGINT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL CHECK (status IN ('in_progress', 'completed')),
+  completed_at TIMESTAMP NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, lesson_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_quiz_results (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  question_id BIGINT NOT NULL REFERENCES quiz_questions(id) ON DELETE CASCADE,
+  selected_choice_id BIGINT NOT NULL REFERENCES quiz_choices(id) ON DELETE CASCADE,
+  is_correct BOOLEAN NOT NULL,
+  answered_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS badges (
+  id BIGSERIAL PRIMARY KEY,
+  course_id BIGINT REFERENCES courses(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  icon VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_badges (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  badge_id BIGINT NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
+  earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, badge_id)
+);
