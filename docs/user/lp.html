@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taxpedia - 税金、はじめの一歩。</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark:  #1a6640;
+    --green-main:  #2d9e60;
+    --green-light: #50c87a;
+    --green-pale:  #d4f5e2;
+    --green-bg:    #f0faf4;
+    --yellow:      #ffd94a;
+    --orange:      #ff8c42;
+    --blue:        #4fc3f7;
+    --ink:         #1a2e20;
+    --gray:        #6b7c72;
+    --white:       #ffffff;
+    --border:      #c6e8d4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--green-bg);
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ━━ DECO BLOBS ━━ */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ━━ HEADER ━━ */
+  header {
+    position: fixed;
+    top: 16px; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 4rem);
+    max-width: 1100px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.8rem;
+    background: rgba(240,250,244,0.92);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    box-shadow: 0 4px 24px rgba(26,102,64,0.1), 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    color: var(--green-dark);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green-main);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 3px 10px rgba(45,158,96,0.35);
+  }
+
+  nav { display: flex; gap: 2rem; align-items: center; }
+  nav a {
+    font-size: 0.875rem; font-weight: 700;
+    color: var(--gray); text-decoration: none;
+    padding: 0.4rem 0.8rem; border-radius: 20px;
+    transition: all 0.2s;
+  }
+  nav a:hover { background: var(--green-pale); color: var(--green-dark); }
+
+  .btn-main {
+    background: var(--green-main);
+    color: #fff; padding: 0.65rem 1.6rem;
+    border-radius: 50px; font-size: 0.875rem; font-weight: 800;
+    text-decoration: none; border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(45,158,96,0.4);
+    transition: all 0.2s; display: inline-block;
+    letter-spacing: 0.02em;
+  }
+  .btn-main:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(45,158,96,0.5); }
+
+  /* ━━ HERO CAROUSEL ━━ */
+  .hero-carousel {
+    position: relative;
+    min-height: 100vh;
+    padding-top: 90px;
+    overflow: hidden;
+  }
+
+  /* Slides track */
+  .carousel-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.77, 0, 0.18, 1);
+  }
+
+  .carousel-slide {
+    min-width: 100%;
+    min-height: calc(100vh - 90px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 3rem;
+    padding: 4rem 5rem 4rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Per-slide background blobs */
+  .slide-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(70px); pointer-events: none; z-index: 0;
+  }
+
+  /* Slide content */
+  .slide-content { position: relative; z-index: 2; }
+  .slide-visual  { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; }
+
+  /* Badge */
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--green-pale);
+    color: var(--green-dark);
+    padding: 0.4rem 1rem; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 800;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+  .hero-badge-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green-main);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+  }
+
+  /* Title */
+  .hero-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 900; line-height: 1.18;
+    color: var(--ink); margin-bottom: 1.2rem;
+  }
+  .hero-title .highlight {
+    position: relative; display: inline-block; color: var(--green-dark);
+  }
+  .hero-title .highlight::before {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: -4px; right: -4px; height: 11px;
+    background: var(--yellow); border-radius: 4px;
+    z-index: -1; opacity: 0.7;
+  }
+  .hero-sub {
+    font-size: 1rem; line-height: 1.85;
+    color: var(--gray); max-width: 440px;
+    margin-bottom: 2rem; font-weight: 400;
+  }
+  .hero-cta { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+
+  .btn-outline {
+    padding: 0.65rem 1.5rem; border-radius: 50px;
+    border: 2.5px solid var(--green-main); color: var(--green-dark);
+    font-size: 0.875rem; font-weight: 800; text-decoration: none;
+    transition: all 0.2s; display: inline-block;
+  }
+  .btn-outline:hover { background: var(--green-pale); transform: translateY(-2px); }
+
+  /* Social proof */
+  .hero-social-proof { display: flex; align-items: center; gap: 1rem; }
+  .avatars { display: flex; }
+  .avatars span {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2.5px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; margin-left: -8px;
+    background: var(--green-pale);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .avatars span:first-child { margin-left: 0; }
+  .social-text { font-size: 0.8rem; color: var(--gray); font-weight: 600; line-height: 1.4; }
+  .social-text strong { color: var(--green-dark); }
+
+  /* ── Carousel controls ── */
+  .carousel-dots {
+    position: absolute;
+    bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 0.6rem; z-index: 10;
+  }
+  .carousel-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--border); border: none; cursor: pointer;
+    transition: all 0.3s; padding: 0;
+  }
+  .carousel-dot.active {
+    background: var(--green-main); width: 28px; border-radius: 5px;
+  }
+
+  .carousel-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--border);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; cursor: pointer; z-index: 10;
+    transition: all 0.2s;
+  }
+  .carousel-arrow:hover { background: var(--green-pale); border-color: var(--green-main); transform: translateY(-50%) scale(1.08); }
+  .carousel-arrow.prev { left: 1.5rem; }
+  .carousel-arrow.next { right: 1.5rem; }
+
+  /* ── Slide visual cards ── */
+
+  /* Slide 1 — phone mock */
+  .phone-mock {
+    background: #fff;
+    border-radius: 28px; padding: 1.5rem;
+    box-shadow: 0 20px 60px rgba(26,102,64,0.15), 0 4px 16px rgba(0,0,0,0.08);
+    border: 2px solid var(--border);
+    width: 320px; position: relative;
+  }
+  .phone-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.2rem; padding-bottom: 1rem;
+    border-bottom: 2px dashed var(--border);
+  }
+  .phone-logo { font-family: 'Fredoka One'; font-size: 1.1rem; color: var(--green-dark); }
+  .progress-label { font-size: 0.72rem; font-weight: 700; color: var(--green-main); }
+  .progress-bar-wrap {
+    background: var(--green-pale); border-radius: 50px; height: 10px;
+    margin-bottom: 1.2rem; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; width: 65%; border-radius: 50px;
+    background: linear-gradient(90deg, var(--green-main), var(--green-light));
+    position: relative; overflow: hidden;
+  }
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+  .lesson-card {
+    background: var(--green-bg); border-radius: 14px; padding: 1rem;
+    margin-bottom: 0.7rem; border: 2px solid var(--border);
+    display: flex; align-items: flex-start; gap: 0.8rem; transition: all 0.2s;
+  }
+  .lesson-card.active { background: var(--green-pale); border-color: var(--green-main); }
+  .lesson-emoji { font-size: 1.4rem; flex-shrink: 0; }
+  .lesson-info { flex: 1; }
+  .lesson-title { font-size: 0.8rem; font-weight: 800; color: var(--ink); margin-bottom: 0.15rem; }
+  .lesson-meta { font-size: 0.68rem; color: var(--gray); }
+  .lesson-badge { font-size: 0.62rem; font-weight: 800; padding: 0.18rem 0.55rem; border-radius: 20px; flex-shrink: 0; }
+  .badge-beginner { background: #d4f5e2; color: var(--green-dark); }
+  .badge-mid { background: #fff3cd; color: #7a5c00; }
+
+  /* floating sticker */
+  .sticker {
+    position: absolute; background: var(--yellow);
+    border-radius: 16px; padding: 0.55rem 1rem;
+    font-size: 0.75rem; font-weight: 800; color: var(--ink);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12); white-space: nowrap; z-index: 3;
+  }
+  .sticker-1 { top: -16px; right: 10px; transform: rotate(4deg); }
+  .sticker-2 { bottom: -12px; left: -12px; transform: rotate(-7deg); background: var(--orange); color: #fff; }
+
+  /* Slide 2 — quiz card big */
+  .hero-quiz-card {
+    background: #fff; border: 2px solid var(--border);
+    border-radius: 24px; overflow: hidden; width: 360px;
+    box-shadow: 0 20px 60px rgba(26,102,64,0.13);
+  }
+  .hqc-top {
+    background: var(--green-main); padding: 1.2rem 1.5rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .hqc-top h3 { font-family: 'Nunito'; font-size: 1rem; font-weight: 900; color: #fff; }
+  .hqc-top .hqc-step { margin-left: auto; background: rgba(255,255,255,0.2); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 20px; }
+  .hqc-body { padding: 1.4rem; }
+  .hqc-q { font-size: 0.9rem; font-weight: 700; color: var(--ink); line-height: 1.65; margin-bottom: 1.1rem; }
+  .hqc-choices { display: flex; flex-direction: column; gap: 0.55rem; }
+  .hqc-choice {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem; background: var(--green-bg);
+    border: 2px solid var(--border); border-radius: 12px;
+    font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all 0.18s;
+  }
+  .hqc-choice:hover { border-color: var(--green-main); background: var(--green-pale); }
+  .hqc-choice.correct { border-color: var(--green-main); background: #d4f5e2; }
+  .hqc-label { width: 26px; height: 26px; border-radius: 50%; background: var(--green-pale); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 900; color: var(--green-dark); flex-shrink: 0; }
+  .hqc-footer { padding: 0.9rem 1.4rem; border-top: 2px dashed var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .hqc-footer span { font-size: 0.75rem; color: var(--gray); font-weight: 600; }
+  .hqc-btn { background: var(--yellow); color: var(--ink); padding: 0.45rem 1.1rem; border-radius: 50px; font-size: 0.78rem; font-weight: 900; border: none; cursor: pointer; transition: all 0.18s; }
+  .hqc-btn:hover { transform: scale(1.05); }
+
+  /* Slide 3 — stats / fact cards */
+  .hero-stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 360px;
+  }
+  .hstat-card {
+    background: #fff; border: 2px solid var(--border); border-radius: 20px;
+    padding: 1.4rem; box-shadow: 0 6px 20px rgba(45,158,96,0.08);
+    transition: transform 0.2s;
+  }
+  .hstat-card:hover { transform: translateY(-3px); }
+  .hstat-card.accent { background: var(--green-main); border-color: var(--green-dark); }
+  .hstat-card.wide { grid-column: span 2; display: flex; align-items: center; gap: 1rem; }
+  .hstat-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .hstat-num { font-family: 'Nunito'; font-size: 2rem; font-weight: 900; color: var(--green-dark); line-height: 1; }
+  .hstat-card.accent .hstat-num { color: #fff; }
+  .hstat-label { font-size: 0.75rem; color: var(--gray); font-weight: 700; margin-top: 0.2rem; }
+  .hstat-card.accent .hstat-label { color: rgba(255,255,255,0.7); }
+  .hstat-wide-text h4 { font-family: 'Nunito'; font-size: 0.95rem; font-weight: 900; color: var(--ink); margin-bottom: 0.25rem; }
+  .hstat-wide-text p { font-size: 0.78rem; color: var(--gray); line-height: 1.5; }
+
+  /* Slide 4 — person cards / personas */
+  .hero-persona-grid { display: flex; flex-direction: column; gap: 0.9rem; width: 340px; }
+  .persona-card {
+    background: #fff; border: 2px solid var(--border); border-radius: 18px;
+    padding: 1.1rem 1.3rem; display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 4px 16px rgba(45,158,96,0.07); transition: all 0.2s;
+  }
+  .persona-card:hover { border-color: var(--green-main); transform: translateX(4px); }
+  .persona-card.active { border-color: var(--green-main); background: var(--green-pale); }
+  .persona-avatar { font-size: 2rem; flex-shrink: 0; }
+  .persona-info { flex: 1; }
+  .persona-name { font-size: 0.85rem; font-weight: 900; color: var(--ink); margin-bottom: 0.15rem; }
+  .persona-desc { font-size: 0.74rem; color: var(--gray); line-height: 1.4; }
+  .persona-tag { font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 20px; background: var(--green-pale); color: var(--green-dark); flex-shrink: 0; }
+
+  /* ━━ MARQUEE ━━ */
+  .marquee-section {
+    background: var(--green-main);
+    padding: 0.9rem 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .marquee-track {
+    display: flex; gap: 2.5rem;
+    animation: marquee 18s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-size: 0.8rem; font-weight: 800;
+    color: rgba(255,255,255,0.8); letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .marquee-item::before { content: '★'; font-size: 0.6rem; color: var(--yellow); }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ━━ SECTION ━━ */
+  section { padding: 7rem 5rem; }
+
+  .section-chip {
+    display: inline-block;
+    background: var(--green-pale);
+    color: var(--green-dark);
+    padding: 0.35rem 0.9rem; border-radius: 50px;
+    font-size: 0.75rem; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: 2px solid var(--border);
+    margin-bottom: 1.2rem;
+  }
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(2rem, 3.2vw, 2.8rem);
+    font-weight: 900; line-height: 1.2;
+    color: var(--ink); margin-bottom: 1rem;
+  }
+  .section-desc {
+    font-size: 0.95rem; line-height: 1.85; color: var(--gray);
+    font-weight: 400; max-width: 520px;
+  }
+
+  /* ━━ FEATURES ━━ */
+  .features { background: #fff; }
+
+  .features-header { text-align: center; margin-bottom: 4rem; }
+  .features-header .section-desc { margin: 0 auto; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .feat-card {
+    background: var(--green-bg);
+    border: 2px solid var(--border);
+    border-radius: 20px; padding: 2.2rem;
+    transition: all 0.25s; position: relative; overflow: hidden;
+    cursor: default;
+  }
+  .feat-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--green-main), var(--green-light));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .feat-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(45,158,96,0.12); border-color: var(--green-light); }
+  .feat-card:hover::after { transform: scaleX(1); }
+
+  .feat-icon-wrap {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 1.4rem;
+    background: #fff; border: 2px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .feat-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem; font-weight: 900; color: var(--ink);
+    margin-bottom: 0.7rem;
+  }
+  .feat-text { font-size: 0.85rem; line-height: 1.8; color: var(--gray); }
+
+  /* ━━ HOW IT WORKS ━━ */
+  .how { background: var(--green-pale); }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 4rem;
+    position: relative;
+  }
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 40px; left: 12%; right: 12%; height: 2px;
+    background: repeating-linear-gradient(90deg, var(--green-main) 0px, var(--green-main) 8px, transparent 8px, transparent 16px);
+    z-index: 0;
+  }
+
+  .step-card {
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 20px; padding: 2rem 1.5rem;
+    text-align: center; position: relative; z-index: 1;
+    transition: transform 0.2s;
+  }
+  .step-card:hover { transform: translateY(-4px); }
+
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--green-main); color: #fff;
+    font-family: 'Fredoka One'; font-size: 1.3rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem;
+    box-shadow: 0 4px 14px rgba(45,158,96,0.4);
+  }
+  .step-emoji { font-size: 2rem; margin-bottom: 0.8rem; }
+  .step-title {
+    font-family: 'Nunito'; font-size: 0.95rem; font-weight: 900;
+    color: var(--ink); margin-bottom: 0.5rem;
+  }
+  .step-text { font-size: 0.8rem; color: var(--gray); line-height: 1.7; }
+
+  /* ━━ CURRICULUM ━━ */
+  .curriculum { background: #fff; }
+
+  .curriculum-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 4rem;
+    align-items: start;
+  }
+
+  .topic-group { margin-bottom: 1.5rem; }
+  .topic-group-label {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--green-main);
+    margin-bottom: 0.7rem;
+  }
+  .topic-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .topic-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1rem;
+    background: var(--green-bg);
+    border: 2px solid var(--border);
+    border-radius: 12px; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .topic-item:hover { background: var(--green-pale); border-color: var(--green-main); transform: translateX(4px); }
+  .topic-left { display: flex; align-items: center; gap: 0.7rem; }
+  .topic-emoji { font-size: 1rem; }
+  .topic-name { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+  .topic-pill {
+    font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+  }
+  .pill-green { background: var(--green-pale); color: var(--green-dark); }
+  .pill-yellow { background: #fff3cd; color: #7a5c00; }
+  .pill-orange { background: #ffe0cc; color: #8b3e00; }
+
+  /* quiz card */
+  .quiz-card {
+    background: var(--green-bg);
+    border: 2px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 8px 30px rgba(45,158,96,0.1);
+    position: sticky; top: 100px;
+  }
+  .quiz-top {
+    background: var(--green-main);
+    padding: 1.2rem 1.5rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .quiz-icon { font-size: 1.4rem; }
+  .quiz-top h3 { font-family: 'Nunito'; font-size: 1rem; font-weight: 900; color: #fff; }
+  .quiz-top span { margin-left: auto; font-size: 0.7rem; background: rgba(255,255,255,0.2); color: #fff; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 700; }
+  .quiz-body { padding: 1.5rem; }
+  .quiz-q { font-size: 0.92rem; font-weight: 700; color: var(--ink); line-height: 1.65; margin-bottom: 1.2rem; }
+  .quiz-choices { display: flex; flex-direction: column; gap: 0.6rem; }
+  .quiz-choice {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    background: #fff; border: 2px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: all 0.18s;
+    font-size: 0.85rem; font-weight: 600;
+  }
+  .quiz-choice:hover { border-color: var(--green-main); background: var(--green-pale); }
+  .quiz-choice.selected { border-color: var(--green-main); background: var(--green-pale); }
+  .quiz-choice.correct { border-color: var(--green-main); background: #d4f5e2; }
+  .choice-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--green-pale); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 900; color: var(--green-dark);
+    flex-shrink: 0;
+  }
+  .quiz-hint {
+    margin-top: 1rem; padding: 0.9rem; background: #d4f5e2;
+    border-radius: 12px; font-size: 0.8rem; color: var(--green-dark);
+    font-weight: 600; display: none;
+  }
+  .quiz-hint.show { display: block; }
+  .quiz-footer {
+    padding: 1rem 1.5rem;
+    border-top: 2px dashed var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .quiz-footer span { font-size: 0.78rem; color: var(--gray); font-weight: 600; }
+  .btn-check {
+    background: var(--yellow); color: var(--ink);
+    padding: 0.5rem 1.2rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 900; border: none; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-check:hover { transform: scale(1.05); }
+
+  /* ━━ TESTIMONIALS ━━ */
+  .testimonials { background: var(--green-bg); }
+
+  .testimonials-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .testi-card {
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 20px; padding: 1.8rem;
+    transition: transform 0.2s;
+  }
+  .testi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(45,158,96,0.1); }
+
+  .testi-stars { color: var(--yellow); font-size: 0.9rem; margin-bottom: 0.8rem; letter-spacing: 2px; }
+  .testi-text { font-size: 0.87rem; line-height: 1.8; color: var(--ink); margin-bottom: 1.2rem; font-weight: 400; }
+  .testi-author { display: flex; align-items: center; gap: 0.7rem; }
+  .testi-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--green-pale); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+  }
+  .testi-name { font-size: 0.83rem; font-weight: 800; color: var(--ink); }
+  .testi-role { font-size: 0.72rem; color: var(--gray); font-weight: 500; }
+
+  /* ━━ REVEAL ━━ */
+  .cta-section {
+    background: var(--green-dark);
+    padding: 8rem 5rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-section .blob { filter: blur(80px); }
+  .cta-blob-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(80,200,122,0.2), transparent 70%); top: -200px; left: -100px; }
+  .cta-blob-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,217,74,0.15), transparent 70%); bottom: -100px; right: 0; }
+
+  .cta-section h2 {
+    font-family: 'Nunito'; font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 900; color: #fff; line-height: 1.2;
+    margin-bottom: 1rem; position: relative; z-index: 1;
+  }
+  .cta-section p {
+    font-size: 1rem; color: rgba(255,255,255,0.6);
+    max-width: 480px; margin: 0 auto 2.5rem;
+    line-height: 1.8; position: relative; z-index: 1;
+  }
+  .cta-btns { display: flex; align-items: center; justify-content: center; gap: 1rem; position: relative; z-index: 1; }
+  .btn-cta-main {
+    background: var(--yellow); color: var(--ink);
+    padding: 0.9rem 2.5rem; border-radius: 50px;
+    font-size: 1rem; font-weight: 900; text-decoration: none;
+    box-shadow: 0 6px 24px rgba(255,217,74,0.5);
+    transition: all 0.2s;
+  }
+  .btn-cta-main:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(255,217,74,0.6); }
+  .cta-note { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 1.5rem; position: relative; z-index: 1; }
+
+  /* ━━ FOOTER ━━ */
+  footer {
+    background: #0f2418;
+    padding: 2.5rem 5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo { font-family: 'Fredoka One'; font-size: 1.3rem; color: rgba(255,255,255,0.5); }
+  .footer-links { display: flex; gap: 1.8rem; }
+  .footer-links a { font-size: 0.78rem; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.2s; font-weight: 600; }
+  .footer-links a:hover { color: rgba(255,255,255,0.7); }
+  .footer-copy { font-size: 0.72rem; color: rgba(255,255,255,0.2); font-weight: 500; }
+
+  /* ━━ ACCOUNT COMPARE ━━ */
+  .account-section { background: var(--green-bg); }
+  .account-header { text-align: center; margin-bottom: 3.5rem; }
+  .account-header .section-desc { margin: 0 auto; }
+
+  .account-compare {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 860px;
+    margin: 0 auto 4rem;
+    position: relative;
+  }
+
+  .compare-card {
+    flex: 1;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 2.2rem;
+    transition: transform 0.2s;
+  }
+  .compare-card:hover { transform: translateY(-4px); }
+  .account-card {
+    border-color: var(--green-main);
+    box-shadow: 0 12px 40px rgba(45,158,96,0.15);
+    position: relative;
+  }
+  .account-card::before {
+    content: '⭐ おすすめ';
+    position: absolute;
+    top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--yellow); color: var(--ink);
+    font-size: 0.72rem; font-weight: 900;
+    padding: 0.3rem 1rem; border-radius: 20px;
+    white-space: nowrap; letter-spacing: 0.05em;
+  }
+
+  .compare-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+  .compare-label {
+    font-family: 'Nunito'; font-size: 1.05rem; font-weight: 900;
+    color: var(--ink); margin-bottom: 0.3rem;
+  }
+  .compare-sub { font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 0; }
+  .compare-divider { border: none; border-top: 2px dashed var(--border); margin: 1.2rem 0; }
+
+  .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.8rem; }
+  .compare-list li { font-size: 0.85rem; font-weight: 600; line-height: 1.5; }
+  .compare-list li.ok { color: var(--ink); }
+  .compare-list li.no { color: #aab8ae; }
+
+  .btn-guest {
+    display: block; text-align: center; padding: 0.8rem;
+    border-radius: 50px; font-size: 0.88rem; font-weight: 800;
+    text-decoration: none; color: var(--green-dark);
+    border: 2.5px solid var(--border); background: var(--green-bg);
+    transition: all 0.2s;
+  }
+  .btn-guest:hover { border-color: var(--green-main); background: var(--green-pale); transform: translateY(-2px); }
+
+  .compare-note {
+    text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.5);
+    margin-top: 0.7rem; font-weight: 500;
+  }
+  .account-card .compare-note { color: var(--gray); }
+
+  .vs-badge {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--green-pale); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One'; font-size: 0.9rem; color: var(--green-dark);
+    flex-shrink: 0; z-index: 1;
+  }
+
+  /* Progress preview */
+  .progress-preview {
+    max-width: 680px; margin: 0 auto; text-align: center;
+  }
+  .pp-label { margin-bottom: 1.2rem; }
+  .pp-card {
+    background: #fff; border: 2px solid var(--border); border-radius: 20px;
+    overflow: hidden; box-shadow: 0 8px 30px rgba(45,158,96,0.1);
+    text-align: left;
+  }
+  .pp-header {
+    background: var(--green-pale); padding: 1.2rem 1.8rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+  }
+  .pp-stat { text-align: center; }
+  .pp-stat-num { font-family: 'Nunito'; font-size: 1.3rem; font-weight: 900; color: var(--green-dark); line-height: 1; }
+  .pp-stat-label { font-size: 0.65rem; color: var(--gray); font-weight: 700; margin-top: 2px; }
+  .pp-courses { padding: 1.2rem 1.8rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .pp-course {
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 0.82rem; font-weight: 700; color: var(--gray);
+  }
+  .pp-course.done { color: var(--ink); }
+  .pp-course.inprogress { color: var(--ink); }
+  .pp-course > span:first-child { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pp-bar-wrap { width: 120px; height: 8px; background: var(--green-pale); border-radius: 50px; overflow: hidden; flex-shrink: 0; }
+  .pp-bar { height: 100%; border-radius: 50px; background: linear-gradient(90deg, var(--green-main), var(--green-light)); }
+  .pp-done-badge { font-size: 0.68rem; font-weight: 800; color: var(--green-dark); background: var(--green-pale); padding: 0.2rem 0.6rem; border-radius: 20px; flex-shrink: 0; }
+  .pp-progress-badge { font-size: 0.68rem; font-weight: 800; color: #7a5c00; background: #fff3cd; padding: 0.2rem 0.6rem; border-radius: 20px; flex-shrink: 0; }
+
+  /* ━━ RESPONSIVE additions ━━ */
+  @media (max-width: 900px) {
+    .account-compare { flex-direction: column; }
+    .vs-badge { transform: rotate(90deg); }
+  }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ━━ RESPONSIVE ━━ */
+  @media (max-width: 900px) {
+    header { padding: 1rem 1.5rem; }
+    nav { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 5rem 1.5rem 3rem; gap: 2rem; }
+    .hero-visual { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .features-grid, .steps-grid, .testimonials-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .steps-grid::before { display: none; }
+    .curriculum-layout { grid-template-columns: 1fr; }
+    .testimonials-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    footer { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
+    .cta-section { padding: 5rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">💡</div>
+    Taxpedia
+  </div>
+  <nav>
+    <a href="#">コース</a>
+    <a href="#">使い方</a>
+    <a href="#">アカウント</a>
+    <a href="#">FAQ</a>
+  </nav>
+  <div style="display:flex;gap:0.6rem;align-items:center;">
+    <a href="#" style="font-size:0.85rem;font-weight:700;color:var(--green-dark);text-decoration:none;padding:0.6rem 1.1rem;border-radius:50px;border:2px solid var(--border);transition:all 0.2s;" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='transparent'">ログイン</a>
+    <a href="#" class="btn-main">📖 今すぐ学ぶ</a>
+  </div>
+</header>
+
+<!-- HERO CAROUSEL -->
+<div class="hero-carousel">
+
+  <div class="carousel-track" id="carouselTrack">
+
+    <!-- ── SLIDE 1: 学習画面イメージ ── -->
+    <div class="carousel-slide" style="background: linear-gradient(135deg, #f0faf4 0%, #e8f8ee 100%);">
+      <div class="slide-blob" style="width:480px;height:480px;background:radial-gradient(circle,rgba(80,200,122,0.22),transparent 70%);top:-100px;left:-80px;"></div>
+      <div class="slide-blob" style="width:320px;height:320px;background:radial-gradient(circle,rgba(255,217,74,0.18),transparent 70%);bottom:0;right:60px;"></div>
+
+      <div class="slide-content">
+        <div class="hero-badge"><div class="hero-badge-dot"></div>完全無料 · 登録なしでも学べる</div>
+        <h1 class="hero-title">
+          税金って、<br>
+          <span class="highlight">むずかしくない。</span><br>
+          もう不安にならない。
+        </h1>
+        <p class="hero-sub">確定申告、ふるさと納税、節税…<br>知っているようで知らない税金の知識を、<br><strong style="color:var(--green-dark)">登録不要・完全無料</strong>で今すぐ学べます。</p>
+        <div class="hero-cta">
+          <a href="#" class="btn-main">📖 登録なしで学ぶ</a>
+          <a href="#" class="btn-outline">📌 進捗を記録したい</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="avatars"><span>🧑</span><span>👩</span><span>👨</span><span>🙋</span></div>
+          <div class="social-text"><strong>12,000人以上</strong>が学習中<br>平均満足度 ★ 4.8</div>
+        </div>
+      </div>
+
+      <div class="slide-visual">
+        <div style="position:relative;">
+          <div class="sticker sticker-1">🎉 今なら無料！</div>
+          <div class="phone-mock">
+            <div class="phone-header">
+              <div class="phone-logo">📗 Taxpedia</div>
+              <div class="progress-label">進捗 65%</div>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+            <div class="lesson-card active">
+              <div class="lesson-emoji">📄</div>
+              <div class="lesson-info"><div class="lesson-title">確定申告のやり方</div><div class="lesson-meta">学習中 · 残り5分</div></div>
+              <span class="lesson-badge badge-mid">中級</span>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-emoji">💰</div>
+              <div class="lesson-info"><div class="lesson-title">ふるさと納税を使いこなす</div><div class="lesson-meta">未学習 · 8分</div></div>
+              <span class="lesson-badge badge-beginner">入門</span>
+            </div>
+            <div class="lesson-card">
+              <div class="lesson-emoji">📈</div>
+              <div class="lesson-info"><div class="lesson-title">iDeCoで節税する方法</div><div class="lesson-meta">未学習 · 10分</div></div>
+              <span class="lesson-badge badge-mid">中級</span>
+            </div>
+          </div>
+          <div class="sticker sticker-2">✅ 3問正解！</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 2: クイズ体験 ── -->
+    <div class="carousel-slide" style="background: linear-gradient(135deg, #fffdf0 0%, #fdf6d8 100%);">
+      <div class="slide-blob" style="width:420px;height:420px;background:radial-gradient(circle,rgba(255,217,74,0.25),transparent 70%);top:-80px;left:-60px;"></div>
+      <div class="slide-blob" style="width:280px;height:280px;background:radial-gradient(circle,rgba(80,200,122,0.2),transparent 70%);bottom:20px;right:40px;"></div>
+
+      <div class="slide-content">
+        <div class="hero-badge" style="background:#fff8d6;border-color:#f0d96a;color:#7a5c00;">🎯 クイズで楽しく学ぶ</div>
+        <h1 class="hero-title">
+          読むだけじゃなく、<br>
+          <span class="highlight" style="--hl:#ffd94a;">クイズで定着。</span><br>
+          理解が深まる。
+        </h1>
+        <p class="hero-sub">各レッスンの終わりに確認クイズ。読みっぱなしにならず、知識が自分のものになる設計です。</p>
+        <div class="hero-cta">
+          <a href="#" class="btn-main">🧠 クイズを体験する</a>
+          <a href="#" class="btn-outline">コースを見る</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="avatars"><span>🎓</span><span>💡</span><span>📚</span><span>✏️</span></div>
+          <div class="social-text"><strong>80以上</strong>のクイズを収録<br>毎月コンテンツ更新中</div>
+        </div>
+      </div>
+
+      <div class="slide-visual">
+        <div class="hero-quiz-card">
+          <div class="hqc-top">
+            <span style="font-size:1.3rem;">🧠</span>
+            <h3>理解度チェック</h3>
+            <span class="hqc-step">Q.2 / 4</span>
+          </div>
+          <div class="hqc-body">
+            <div class="hqc-q">給与から天引きされる「所得税」は、何を基準に計算されますか？</div>
+            <div class="hqc-choices">
+              <div class="hqc-choice"><span class="hqc-label">A</span>総支給額（額面）</div>
+              <div class="hqc-choice correct"><span class="hqc-label">B</span>各種控除を引いた課税所得</div>
+              <div class="hqc-choice"><span class="hqc-label">C</span>手取り金額</div>
+              <div class="hqc-choice"><span class="hqc-label">D</span>会社が自由に決める</div>
+            </div>
+            <div style="margin-top:0.9rem;padding:0.85rem;background:#d4f5e2;border-radius:12px;font-size:0.78rem;color:var(--green-dark);font-weight:600;">🎉 正解！所得税は「収入 − 各種控除 ＝ 課税所得」に税率をかけて計算されます。</div>
+          </div>
+          <div class="hqc-footer">
+            <span>⭐ 連続正解中！</span>
+            <button class="hqc-btn">次の問題 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 3: 統計・数字で魅力訴求 ── -->
+    <div class="carousel-slide" style="background: linear-gradient(135deg, #f0faf4 0%, #e4f4ee 100%);">
+      <div class="slide-blob" style="width:500px;height:500px;background:radial-gradient(circle,rgba(45,158,96,0.15),transparent 70%);top:-120px;right:-80px;"></div>
+      <div class="slide-blob" style="width:300px;height:300px;background:radial-gradient(circle,rgba(255,140,66,0.12),transparent 70%);bottom:0;left:0;"></div>
+
+      <div class="slide-content">
+        <div class="hero-badge"><div class="hero-badge-dot"></div>数字で見る Taxpedia</div>
+        <h1 class="hero-title">
+          税金の知識が、<br>
+          <span class="highlight">お金を守る。</span><br>
+          今日から変わる。
+        </h1>
+        <p class="hero-sub">正しい知識を持つだけで、知らずに損していた税金が戻ってくることも。まずは知ることから始めましょう。</p>
+        <div class="hero-cta">
+          <a href="#" class="btn-main">📖 学習をスタート</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="avatars"><span>🧑</span><span>👩</span><span>👨</span><span>🙋</span></div>
+          <div class="social-text"><strong>12,000人以上</strong>が学習中<br>平均満足度 ★ 4.8</div>
+        </div>
+      </div>
+
+      <div class="slide-visual">
+        <div class="hero-stats-grid">
+          <div class="hstat-card accent">
+            <div class="hstat-icon">📚</div>
+            <div class="hstat-num">80+</div>
+            <div class="hstat-label">学習コンテンツ数</div>
+          </div>
+          <div class="hstat-card">
+            <div class="hstat-icon">⏱️</div>
+            <div class="hstat-num">5分</div>
+            <div class="hstat-label">1レッスンの目安時間</div>
+          </div>
+          <div class="hstat-card">
+            <div class="hstat-icon">🏆</div>
+            <div class="hstat-num">4.8</div>
+            <div class="hstat-label">平均満足度（5点満点）</div>
+          </div>
+          <div class="hstat-card accent">
+            <div class="hstat-icon">👥</div>
+            <div class="hstat-num">12K+</div>
+            <div class="hstat-label">学習中のユーザー</div>
+          </div>
+          <div class="hstat-card wide">
+            <div style="font-size:2.2rem;">🆓</div>
+            <div class="hstat-wide-text">
+              <h4>全コンテンツ、完全無料</h4>
+              <p>登録不要・クレカ不要。今すぐ全部読めます。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 4: こんな人におすすめ ── -->
+    <div class="carousel-slide" style="background: linear-gradient(135deg, #f5f0ff 0%, #ede8ff 100%);">
+      <div class="slide-blob" style="width:460px;height:460px;background:radial-gradient(circle,rgba(139,108,255,0.15),transparent 70%);top:-80px;right:-60px;"></div>
+      <div class="slide-blob" style="width:300px;height:300px;background:radial-gradient(circle,rgba(80,200,122,0.18),transparent 70%);bottom:20px;left:20px;"></div>
+
+      <div class="slide-content">
+        <div class="hero-badge" style="background:#f0ebff;border-color:#c9b8ff;color:#5b3fc8;">🙋 あなたにぴったり</div>
+        <h1 class="hero-title">
+          どんな人でも、<br>
+          <span class="highlight">自分のペースで</span><br>
+          学べます。
+        </h1>
+        <p class="hero-sub">学生から社会人、副業をはじめた人まで。それぞれのシーンに合ったコースがあります。</p>
+        <div class="hero-cta">
+          <a href="#" class="btn-main" style="background:#7c5cbf;">🗂️ コースを選ぶ</a>
+          <a href="#" class="btn-outline" style="border-color:#7c5cbf;color:#5b3fc8;">使い方を見る</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="avatars"><span>🎓</span><span>💼</span><span>🏠</span><span>📱</span></div>
+          <div class="social-text">学生・社会人・フリーランス<br><strong>誰でも無料で</strong>はじめられます</div>
+        </div>
+      </div>
+
+      <div class="slide-visual">
+        <div class="hero-persona-grid">
+          <div class="persona-card active">
+            <div class="persona-avatar">🎓</div>
+            <div class="persona-info">
+              <div class="persona-name">学生・これから社会人</div>
+              <div class="persona-desc">給与明細の読み方、扶養の仕組みをゼロから理解</div>
+            </div>
+            <span class="persona-tag">入門</span>
+          </div>
+          <div class="persona-card">
+            <div class="persona-avatar">💼</div>
+            <div class="persona-info">
+              <div class="persona-name">社会人・会社員</div>
+              <div class="persona-desc">年末調整・ふるさと納税・iDeCoを活用したい</div>
+            </div>
+            <span class="persona-tag">中級</span>
+          </div>
+          <div class="persona-card">
+            <div class="persona-avatar">💻</div>
+            <div class="persona-info">
+              <div class="persona-name">副業・フリーランス</div>
+              <div class="persona-desc">確定申告・経費・青色申告のポイントを学ぶ</div>
+            </div>
+            <span class="persona-tag">上級</span>
+          </div>
+          <div class="persona-card">
+            <div class="persona-avatar">🏠</div>
+            <div class="persona-info">
+              <div class="persona-name">結婚・住宅購入など</div>
+              <div class="persona-desc">配偶者控除・住宅ローン控除など人生の節目の税知識</div>
+            </div>
+            <span class="persona-tag">中級</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /carousel-track -->
+
+  <!-- Arrows -->
+  <button class="carousel-arrow prev" id="prevBtn">‹</button>
+  <button class="carousel-arrow next" id="nextBtn">›</button>
+
+  <!-- Dots -->
+  <div class="carousel-dots" id="carouselDots">
+    <button class="carousel-dot active" data-index="0"></button>
+    <button class="carousel-dot" data-index="1"></button>
+    <button class="carousel-dot" data-index="2"></button>
+    <button class="carousel-dot" data-index="3"></button>
+  </div>
+
+</div><!-- /hero-carousel -->
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">所得税</span>
+    <span class="marquee-item">確定申告</span>
+    <span class="marquee-item">ふるさと納税</span>
+    <span class="marquee-item">住民税</span>
+    <span class="marquee-item">相続税</span>
+    <span class="marquee-item">節税対策</span>
+    <span class="marquee-item">iDeCo</span>
+    <span class="marquee-item">NISA</span>
+    <span class="marquee-item">青色申告</span>
+    <span class="marquee-item">副業の税金</span>
+    <span class="marquee-item">消費税</span>
+    <!-- repeat -->
+    <span class="marquee-item">所得税</span>
+    <span class="marquee-item">確定申告</span>
+    <span class="marquee-item">ふるさと納税</span>
+    <span class="marquee-item">住民税</span>
+    <span class="marquee-item">相続税</span>
+    <span class="marquee-item">節税対策</span>
+    <span class="marquee-item">iDeCo</span>
+    <span class="marquee-item">NISA</span>
+    <span class="marquee-item">青色申告</span>
+    <span class="marquee-item">副業の税金</span>
+    <span class="marquee-item">消費税</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features reveal">
+  <div class="features-header">
+    <div class="section-chip">✨ Features</div>
+    <h2 class="section-title">Taxpediaが選ばれる理由</h2>
+    <p class="section-desc">難しいこと、ゼロ。楽しいこと、いっぱい。</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon-wrap">📚</div>
+      <div class="feat-title">ゼロからでも大丈夫</div>
+      <p class="feat-text">専門用語をかみ砕いた説明で、まったく知識がない人でもスラスラ読める。「難しそう」という壁を取り除いた設計です。</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon-wrap">🎯</div>
+      <div class="feat-title">クイズで楽しく定着</div>
+      <p class="feat-text">各レッスンの終わりに確認クイズ。読みっぱなしにならず、知識がしっかり自分のものになります。</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon-wrap">⏱️</div>
+      <div class="feat-title">1レッスン5〜10分</div>
+      <p class="feat-text">通勤・休憩・ちょっとした隙間時間にサクッと学べるコンパクト設計。忙しい学生・社会人にぴったり。</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how reveal">
+  <div class="section-chip">🗺️ How it works</div>
+  <h2 class="section-title">使い方はとっても簡単</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-emoji">📝</div>
+      <div class="step-title">無料で登録する</div>
+      <p class="step-text">メールアドレスだけで OK。クレカ不要、30秒で完了。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-emoji">🗂️</div>
+      <div class="step-title">コースを選ぶ</div>
+      <p class="step-text">「はじめての確定申告」「副業の税金」など目的別コースがずらり。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-emoji">📖</div>
+      <div class="step-title">読んでクイズ！</div>
+      <p class="step-text">わかりやすい解説を読んで、クイズで理解を確認。スキマ時間で OK。</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-emoji">🏆</div>
+      <div class="step-title">税金マスターへ</div>
+      <p class="step-text">コース修了で修了バッジを獲得。確認申告も節税も自信を持って！</p>
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section class="curriculum reveal">
+  <div class="curriculum-layout">
+    <div>
+      <div class="section-chip">📋 Curriculum</div>
+      <h2 class="section-title">学べるコンテンツ</h2>
+      <p class="section-desc">学生・社会人・副業まで、あなたの状況に合ったコースが揃っています。</p>
+
+      <div class="topic-group" style="margin-top:2rem;">
+        <div class="topic-group-label">🌱 入門レベル</div>
+        <div class="topic-list">
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">💴</span><span class="topic-name">そもそも税金って何？</span></div>
+            <span class="topic-pill pill-green">入門</span>
+          </div>
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">📊</span><span class="topic-name">給与明細の読み方</span></div>
+            <span class="topic-pill pill-green">入門</span>
+          </div>
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">🏘️</span><span class="topic-name">ふるさと納税ってお得なの？</span></div>
+            <span class="topic-pill pill-green">入門</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-group">
+        <div class="topic-group-label">🌿 中級レベル</div>
+        <div class="topic-list">
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">📄</span><span class="topic-name">確定申告の手順と書類</span></div>
+            <span class="topic-pill pill-yellow">中級</span>
+          </div>
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">💼</span><span class="topic-name">副業の税金・経費のポイント</span></div>
+            <span class="topic-pill pill-yellow">中級</span>
+          </div>
+          <div class="topic-item">
+            <div class="topic-left"><span class="topic-emoji">🏦</span><span class="topic-name">iDeCo・NISAで賢く節税</span></div>
+            <span class="topic-pill pill-orange">上級</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-top">
+        <span class="quiz-icon">🧠</span>
+        <h3>理解度チェック</h3>
+        <span>Q.3 / 5</span>
+      </div>
+      <div class="quiz-body">
+        <div class="quiz-q">
+          「ふるさと納税」をすると、翌年の税金がどうなりますか？
+        </div>
+        <div class="quiz-choices">
+          <div class="quiz-choice" onclick="selectChoice(this, false)">
+            <span class="choice-circle">A</span>
+            税金がすべて免除される
+          </div>
+          <div class="quiz-choice" onclick="selectChoice(this, true)">
+            <span class="choice-circle">B</span>
+            寄附金額の一部が控除・還付される
+          </div>
+          <div class="quiz-choice" onclick="selectChoice(this, false)">
+            <span class="choice-circle">C</span>
+            税金が2倍になる
+          </div>
+          <div class="quiz-choice" onclick="selectChoice(this, false)">
+            <span class="choice-circle">D</span>
+            特に変わらない
+          </div>
+        </div>
+        <div class="quiz-hint" id="quizHint">
+          🎉 正解！ふるさと納税は自己負担2,000円を超えた分が、翌年の住民税・所得税から控除または還付されます。
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <span>⭐ ストリーク 7日連続！</span>
+        <button class="btn-check" onclick="checkAnswer()">答え合わせ →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials reveal">
+  <div class="testimonials-header">
+    <div>
+      <div class="section-chip">💬 Voices</div>
+      <h2 class="section-title">みんなの声</h2>
+    </div>
+    <p class="section-desc">12,000人以上のユーザーに<br>使っていただいています。</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">社会人1年目でお金のことがまったくわからなかったんですが、Taxpediaのおかげで給与明細の見方から確定申告まで一気に理解できました！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">🧑</div>
+        <div>
+          <div class="testi-name">田中 蓮 さん</div>
+          <div class="testi-role">社会人 1年目・22歳</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">副業を始めようとしたとき、税金のことが心配で…。Taxpediaで「副業の税金」コースを受けたら、何をすべきかすっきり整理できました！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">👩</div>
+        <div>
+          <div class="testi-name">鈴木 あかり さん</div>
+          <div class="testi-role">大学院生・25歳</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★☆</div>
+      <p class="testi-text">ふるさと納税やiDeCoって名前は知ってたけど正直よくわかってなくて。クイズ形式で学べるのが楽しくて、気づいたら全部終わってた笑</p>
+      <div class="testi-author">
+        <div class="testi-avatar">👨</div>
+        <div>
+          <div class="testi-name">佐々木 湊 さん</div>
+          <div class="testi-role">大学3年生・21歳</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACCOUNT vs GUEST -->
+<section class="account-section reveal">
+  <div class="account-header">
+    <div class="section-chip">🔓 完全無料</div>
+    <h2 class="section-title">登録しなくても学べる。<br>登録するともっと便利。</h2>
+    <p class="section-desc">Taxpedia はすべてのコンテンツが無料。アカウント登録は任意ですが、登録すると学習の続きをどこからでも再開できます。</p>
+  </div>
+
+  <div class="account-compare">
+    <!-- Guest -->
+    <div class="compare-card guest-card">
+      <div class="compare-icon">👤</div>
+      <div class="compare-label">ゲストで学ぶ</div>
+      <div class="compare-sub">登録・ログイン不要</div>
+      <hr class="compare-divider">
+      <ul class="compare-list">
+        <li class="ok">✅ 全コース・全コンテンツを読める</li>
+        <li class="ok">✅ クイズに挑戦できる</li>
+        <li class="ok">✅ 税金用語辞典を使える</li>
+        <li class="no">❌ 学習進捗は保存されない</li>
+        <li class="no">❌ 続きから再開できない</li>
+        <li class="no">❌ 学習履歴・修了バッジなし</li>
+      </ul>
+      <a href="#" class="btn-guest">今すぐ学びはじめる →</a>
+    </div>
+
+    <!-- VS badge -->
+    <div class="vs-badge">VS</div>
+
+    <!-- Account -->
+    <div class="compare-card account-card">
+      <div class="compare-icon">🌟</div>
+      <div class="compare-label">アカウント登録して学ぶ</div>
+      <div class="compare-sub">無料・メールだけで30秒</div>
+      <hr class="compare-divider">
+      <ul class="compare-list">
+        <li class="ok">✅ 全コース・全コンテンツを読める</li>
+        <li class="ok">✅ クイズに挑戦できる</li>
+        <li class="ok">✅ 税金用語辞典を使える</li>
+        <li class="ok">✅ <strong>学習進捗が自動保存される</strong></li>
+        <li class="ok">✅ <strong>どのデバイスからでも続きを再開</strong></li>
+        <li class="ok">✅ <strong>修了バッジ・学習履歴を記録</strong></li>
+      </ul>
+      <a href="#" class="btn-main" style="display:block;text-align:center;padding:0.85rem;">✨ 無料でアカウント登録</a>
+      <p class="compare-note">クレジットカード不要 · いつでも退会できます</p>
+    </div>
+  </div>
+
+  <!-- Progress preview -->
+  <div class="progress-preview reveal">
+    <div class="pp-label">
+      <span class="section-chip" style="margin:0;">📊 アカウント登録後のマイページイメージ</span>
+    </div>
+    <div class="pp-card">
+      <div class="pp-header">
+        <div>
+          <div style="font-family:'Fredoka One';font-size:1rem;color:var(--green-dark);">📗 Taxpedia</div>
+          <div style="font-size:0.75rem;color:var(--gray);font-weight:600;margin-top:2px;">田中 蓮さんのマイページ</div>
+        </div>
+        <div style="display:flex;gap:1rem;">
+          <div class="pp-stat"><div class="pp-stat-num">6</div><div class="pp-stat-label">修了コース</div></div>
+          <div class="pp-stat"><div class="pp-stat-num">🔥 7</div><div class="pp-stat-label">連続学習日</div></div>
+          <div class="pp-stat"><div class="pp-stat-num">4</div><div class="pp-stat-label">獲得バッジ</div></div>
+        </div>
+      </div>
+      <div class="pp-courses">
+        <div class="pp-course done">
+          <span>💴 そもそも税金って何？</span>
+          <div class="pp-bar-wrap"><div class="pp-bar" style="width:100%;background:var(--green-main);"></div></div>
+          <span class="pp-done-badge">✓ 修了</span>
+        </div>
+        <div class="pp-course done">
+          <span>📊 給与明細の読み方</span>
+          <div class="pp-bar-wrap"><div class="pp-bar" style="width:100%;background:var(--green-main);"></div></div>
+          <span class="pp-done-badge">✓ 修了</span>
+        </div>
+        <div class="pp-course inprogress">
+          <span>📄 確定申告の手順と書類</span>
+          <div class="pp-bar-wrap"><div class="pp-bar" style="width:65%;"></div></div>
+          <span class="pp-progress-badge">65% 学習中</span>
+        </div>
+        <div class="pp-course">
+          <span>💼 副業の税金・経費のポイント</span>
+          <div class="pp-bar-wrap"><div class="pp-bar" style="width:0%;"></div></div>
+          <span style="font-size:0.7rem;color:var(--gray);font-weight:600;">未開始</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="blob cta-blob-1"></div>
+  <div class="blob cta-blob-2"></div>
+  <h2>さあ、税金を<br>自分の味方にしよう。</h2>
+  <p>登録不要・完全無料。<br>今日から12,000人と一緒に学びはじめませんか？</p>
+  <div class="cta-btns">
+    <a href="#" class="btn-cta-main">📖 登録なしで今すぐ学ぶ</a>
+    <a href="#" style="padding:0.9rem 2rem;border-radius:50px;font-size:0.95rem;font-weight:900;text-decoration:none;color:rgba(255,255,255,0.7);border:2px solid rgba(255,255,255,0.25);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">📌 アカウント登録して進捗を記録</a>
+  </div>
+  <div class="cta-note">全コンテンツ無料 · クレジットカード不要 · アカウント登録も無料</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">📗 Taxpedia</div>
+  <div class="footer-links">
+    <a href="#">利用規約</a>
+    <a href="#">プライバシーポリシー</a>
+    <a href="#">お問い合わせ</a>
+    <a href="#">運営会社</a>
+  </div>
+  <div class="footer-copy">© 2025 Taxpedia. All rights reserved.</div>
+</footer>
+
+<script>
+  // ── Carousel ──
+  const track   = document.getElementById('carouselTrack');
+  const dots    = document.querySelectorAll('.carousel-dot');
+  const total   = 4;
+  let current   = 0;
+  let autoTimer = null;
+
+  function goTo(index) {
+    current = (index + total) % total;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(() => goTo(current + 1), 5000);
+  }
+  function stopAuto() {
+    if (autoTimer) clearInterval(autoTimer);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => { goTo(current - 1); startAuto(); });
+  document.getElementById('nextBtn').addEventListener('click', () => { goTo(current + 1); startAuto(); });
+  dots.forEach(d => d.addEventListener('click', () => { goTo(+d.dataset.index); startAuto(); }));
+
+  // Pause on hover
+  track.addEventListener('mouseenter', stopAuto);
+  track.addEventListener('mouseleave', startAuto);
+
+  // Swipe support
+  let touchStartX = 0;
+  track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) goTo(diff > 0 ? current + 1 : current - 1);
+    startAuto();
+  });
+
+  startAuto();
+
+  // ── Scroll reveal ──
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 60);
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => io.observe(el));
+
+  // ── Quiz ──
+  function selectChoice(el, correct) {
+    document.querySelectorAll('.quiz-choice').forEach(c => c.classList.remove('selected', 'correct'));
+    el.classList.add('selected');
+    el._correct = correct;
+  }
+  function checkAnswer() {
+    const selected = document.querySelector('.quiz-choice.selected');
+    if (!selected) return;
+    if (selected._correct) {
+      selected.classList.add('correct');
+      document.getElementById('quizHint').classList.add('show');
+    } else {
+      selected.style.borderColor = '#ff6b6b';
+      selected.style.background = '#ffe8e8';
+    }
+  }
+</script>
+</body>
+</html>
