@@ -25,6 +25,13 @@ export function Header() {
         ))}
       </nav>
 
+      {isLoading && (
+        <div className="tp-header-auth" aria-hidden="true">
+          <div className="tp-header-skeleton tp-header-skeleton-text" />
+          <div className="tp-header-skeleton tp-header-skeleton-btn" />
+        </div>
+      )}
+
       {!isLoading && (
         <div className="tp-header-auth">
           {user ? (
