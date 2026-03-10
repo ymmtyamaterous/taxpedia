@@ -1,6 +1,21 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+import { useAuth } from "@/components/auth-provider";
 import { Header } from "@/components/header";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { user, token, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !token) {
+      router.push("/login");
+    }
+  }, [isLoading, token, router]);
+
   return (
     <div className="tp-page">
       <Header />
@@ -10,26 +25,16 @@ export default function SettingsPage() {
         <form className="tp-form">
           <label>
             表示名
-            <input type="text" defaultValue="デモユーザー" />
+            <input type="text" defaultValue={user?.displayName ?? ""} disabled />
           </label>
-          <button type="submit" className="tp-primary-btn">
-            保存
-          </button>
-        </form>
-
-        <form className="tp-form">
           <label>
-            新しいパスワード
-            <input type="password" minLength={8} />
+            メールアドレス
+            <input type="email" defaultValue={user?.email ?? ""} disabled />
           </label>
-          <button type="submit" className="tp-primary-btn">
-            パスワード変更
-          </button>
+          <p>プロフィール更新APIは未実装のため表示のみです。</p>
         </form>
 
-        <button type="button" className="tp-danger-btn">
-          退会する
-        </button>
+        <p className="tp-lead">パスワード変更・退会APIは次フェーズで接続します。</p>
       </main>
     </div>
   );

@@ -1,12 +1,17 @@
+"use client";
+
 import Link from "next/link";
+
+import { useAuth } from "@/components/auth-provider";
 
 const navItems = [
   { href: "/courses", label: "コース" },
   { href: "/mypage", label: "マイページ" },
-  { href: "/login", label: "ログイン" },
 ];
 
 export function Header() {
+  const { user, logout, isLoading } = useAuth();
+
   return (
     <header className="tp-header">
       <Link href="/" className="tp-logo">
@@ -19,9 +24,28 @@ export function Header() {
           </Link>
         ))}
       </nav>
-      <Link href="/register" className="tp-primary-btn">
-        無料で始める
-      </Link>
+
+      {!isLoading && (
+        <div className="tp-header-auth">
+          {user ? (
+            <>
+              <span className="tp-user-name">{user.displayName}</span>
+              <button type="button" className="tp-link-btn" onClick={logout}>
+                ログアウト
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="tp-link-btn">
+                ログイン
+              </Link>
+              <Link href="/register" className="tp-primary-btn">
+                無料で始める
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 }

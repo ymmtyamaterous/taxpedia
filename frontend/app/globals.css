@@ -74,6 +74,18 @@ a {
   font-weight: 600;
 }
 
+.tp-header-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tp-user-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
 .tp-title {
   font-size: clamp(1.8rem, 4vw, 2.7rem);
   font-weight: 800;
@@ -155,11 +167,13 @@ a {
   border: 0;
   background: var(--green-main);
   color: #fff;
+  cursor: pointer;
 }
 
 .tp-link-btn {
   background: #fff;
   border: 2px solid var(--green-pale);
+  cursor: pointer;
 }
 
 .tp-danger-btn {
@@ -286,6 +300,12 @@ a {
   padding: 0.6rem;
   color: var(--ink);
   background: #fff;
+}
+
+.tp-error {
+  color: #b42318;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 900px) {
