@@ -28,25 +28,22 @@ const TOKEN_KEY = "taxpedia_token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-    return window.localStorage.getItem(TOKEN_KEY);
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(() => {
-    if (typeof window === "undefined") {
-      return true;
-    }
-    return window.localStorage.getItem(TOKEN_KEY) !== null;
-  });
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!token) {
+    const savedToken = window.localStorage.getItem(TOKEN_KEY);
+    if (!savedToken) {
+      queueMicrotask(() => {
+        setIsLoading(false);
+      });
       return;
     }
 
-    meApi(token)
+    queueMicrotask(() => {
+      setToken(savedToken);
+    });
+    meApi(savedToken)
       .then((me) => {
         setUser(me);
       })
@@ -58,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [token]);
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await loginApi({ email, password });
