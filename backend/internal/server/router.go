@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"strings"
@@ -9,10 +10,12 @@ import (
 type Server struct {
 	mux     *http.ServeMux
 	handler http.Handler
+	db      *sql.DB
+	jwtKey  []byte
 }
 
-func New(allowedOrigins string) *Server {
-	s := &Server{mux: http.NewServeMux()}
+func New(allowedOrigins string, db *sql.DB, jwtSecret string) *Server {
+	s := &Server{mux: http.NewServeMux(), db: db, jwtKey: []byte(jwtSecret)}
 	s.routes()
 	s.handler = withCORS(s.mux, allowedOrigins)
 	return s
@@ -26,8 +29,8 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/health", s.health)
 
 	s.mux.HandleFunc("GET /api/courses", s.getCourses)
-	s.mux.HandleFunc("GET /api/courses/", s.getCourseByID)
-	s.mux.HandleFunc("GET /api/lessons/", s.lessonRoute)
+	s.mux.HandleFunc("/api/courses/", s.courseRoute)
+	s.mux.HandleFunc("/api/lessons/", s.lessonRoute)
 
 	s.mux.HandleFunc("POST /api/auth/register", s.register)
 	s.mux.HandleFunc("POST /api/auth/login", s.login)

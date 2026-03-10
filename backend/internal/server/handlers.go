@@ -1,71 +1,115 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
-
-var courses = []Course{
-	{ID: 1, Title: "そもそも税金って何？", Description: "税金の基本を学ぶ", Level: "beginner"},
-	{ID: 2, Title: "給与明細の読み方", Description: "控除や税額の見方を理解", Level: "beginner"},
-	{ID: 3, Title: "ふるさと納税ってお得なの？", Description: "制度を正しく使う", Level: "beginner"},
-	{ID: 4, Title: "確定申告の手順と書類", Description: "申告の流れを把握", Level: "intermediate"},
-	{ID: 5, Title: "副業の税金・経費のポイント", Description: "副業時の税務知識", Level: "intermediate"},
-	{ID: 6, Title: "iDeCo・NISAで賢く節税", Description: "資産形成と節税", Level: "advanced"},
-}
-
-var lessons = []Lesson{
-	{ID: 1, CourseID: 1, Title: "税金の役割", Content: "税金は社会を支える仕組みです。", EstimatedMinute: 5},
-	{ID: 2, CourseID: 2, Title: "給与明細の見方", Content: "支給額・控除額・手取りを確認しましょう。", EstimatedMinute: 8},
-	{ID: 3, CourseID: 4, Title: "確定申告の準備", Content: "必要書類を先に揃えます。", EstimatedMinute: 10},
-}
-
-var quizQuestions = []QuizQuestion{
-	{
-		ID:          1,
-		LessonID:    1,
-		Question:    "所得税は何を基準に計算されますか？",
-		Explanation: "課税所得に税率を適用して計算します。",
-		AnswerID:    2,
-		Choices: []QuizChoice{
-			{ID: 1, Label: "A", Text: "総支給額"},
-			{ID: 2, Label: "B", Text: "課税所得"},
-			{ID: 3, Label: "C", Text: "手取り金額"},
-			{ID: 4, Label: "D", Text: "会社が決める"},
-		},
-	},
-}
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (s *Server) getCourses(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]any{"items": courses})
+	rows, err := s.db.Query(`SELECT id, title, description, level FROM courses ORDER BY order_index, id`)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load courses")
+		return
+	}
+	defer rows.Close()
+
+	items := make([]Course, 0)
+	for rows.Next() {
+		var c Course
+		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Level); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan courses")
+			return
+		}
+		items = append(items, c)
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
-func (s *Server) getCourseByID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) courseRoute(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/courses/")
-	if idStr == "" || strings.Contains(idStr, "/") {
-		writeErr(w, http.StatusNotFound, "not found")
+	if idStr == "" {
+		writeErr(w, http.StatusBadRequest, "invalid course id")
+		return
+	}
+	parts := strings.Split(idStr, "/")
+	if len(parts) == 0 || parts[0] == "" {
+		writeErr(w, http.StatusBadRequest, "invalid course id")
 		return
 	}
 
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(parts[0])
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, "invalid id")
 		return
 	}
 
-	for _, c := range courses {
-		if c.ID == id {
-			writeJSON(w, http.StatusOK, c)
+	if len(parts) == 1 && r.Method == http.MethodGet {
+		s.getCourseByID(w, id)
+		return
+	}
+
+	if len(parts) == 2 && parts[1] == "lessons" && r.Method == http.MethodGet {
+		s.getCourseLessons(w, id)
+		return
+	}
+
+	writeErr(w, http.StatusNotFound, "not found")
+}
+
+func (s *Server) getCourseByID(w http.ResponseWriter, courseID int) {
+	var c Course
+	err := s.db.QueryRow(`SELECT id, title, description, level FROM courses WHERE id = $1`, courseID).Scan(
+		&c.ID,
+		&c.Title,
+		&c.Description,
+		&c.Level,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusNotFound, "course not found")
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load course")
+		return
+	}
+	writeJSON(w, http.StatusOK, c)
+}
+
+func (s *Server) getCourseLessons(w http.ResponseWriter, courseID int) {
+	rows, err := s.db.Query(
+		`SELECT id, course_id, title, content, estimated_minutes FROM lessons WHERE course_id = $1 ORDER BY order_index, id`,
+		courseID,
+	)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load lessons")
+		return
+	}
+	defer rows.Close()
+
+	items := make([]Lesson, 0)
+	for rows.Next() {
+		var l Lesson
+		if err := rows.Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan lessons")
 			return
 		}
+		items = append(items, l)
 	}
-	writeErr(w, http.StatusNotFound, "course not found")
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
 func (s *Server) lessonRoute(w http.ResponseWriter, r *http.Request) {
@@ -90,9 +134,32 @@ func (s *Server) lessonRoute(w http.ResponseWriter, r *http.Request) {
 	if len(parts) == 2 {
 		switch {
 		case parts[1] == "start" && r.Method == http.MethodPost:
+			claims, err := s.parseAuth(r)
+			if err != nil {
+				writeErr(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+
+			if err := s.upsertLessonProgress(claims.UserID, int64(lessonID), "in_progress", nil); err != nil {
+				writeErr(w, http.StatusInternalServerError, "failed to save progress")
+				return
+			}
+
 			writeJSON(w, http.StatusOK, map[string]any{"lessonId": lessonID, "status": "in_progress"})
 			return
 		case parts[1] == "complete" && r.Method == http.MethodPost:
+			claims, err := s.parseAuth(r)
+			if err != nil {
+				writeErr(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+
+			now := time.Now()
+			if err := s.upsertLessonProgress(claims.UserID, int64(lessonID), "completed", &now); err != nil {
+				writeErr(w, http.StatusInternalServerError, "failed to save progress")
+				return
+			}
+
 			writeJSON(w, http.StatusOK, map[string]any{"lessonId": lessonID, "status": "completed"})
 			return
 		case parts[1] == "quiz" && r.Method == http.MethodGet:
@@ -105,22 +172,72 @@ func (s *Server) lessonRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getLessonByID(w http.ResponseWriter, lessonID int) {
-	for _, l := range lessons {
-		if l.ID == lessonID {
-			writeJSON(w, http.StatusOK, l)
-			return
-		}
+	var l Lesson
+	err := s.db.QueryRow(
+		`SELECT id, course_id, title, content, estimated_minutes FROM lessons WHERE id = $1`,
+		lessonID,
+	).Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusNotFound, "lesson not found")
+		return
 	}
-	writeErr(w, http.StatusNotFound, "lesson not found")
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load lesson")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, l)
 }
 
 func (s *Server) getLessonQuiz(w http.ResponseWriter, lessonID int) {
+	qRows, err := s.db.Query(
+		`SELECT id, lesson_id, question_text, explanation FROM quiz_questions WHERE lesson_id = $1 ORDER BY order_index, id`,
+		lessonID,
+	)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load quiz")
+		return
+	}
+	defer qRows.Close()
+
 	items := make([]QuizQuestion, 0)
-	for _, q := range quizQuestions {
-		if q.LessonID == lessonID {
-			items = append(items, q)
+	questionIDs := make([]int, 0)
+	questionMap := make(map[int]*QuizQuestion)
+	for qRows.Next() {
+		q := QuizQuestion{Choices: make([]QuizChoice, 0)}
+		if err := qRows.Scan(&q.ID, &q.LessonID, &q.Question, &q.Explanation); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan quiz")
+			return
+		}
+		items = append(items, q)
+		questionIDs = append(questionIDs, q.ID)
+		questionMap[q.ID] = &items[len(items)-1]
+	}
+
+	if len(questionIDs) > 0 {
+		cRows, err := s.db.Query(
+			`SELECT id, question_id, choice_label, choice_text FROM quiz_choices WHERE question_id = ANY($1) ORDER BY id`,
+			pq.Array(questionIDs),
+		)
+		if err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to load choices")
+			return
+		}
+		defer cRows.Close()
+
+		for cRows.Next() {
+			var choice QuizChoice
+			var qID int
+			if err := cRows.Scan(&choice.ID, &qID, &choice.Label, &choice.Text); err != nil {
+				writeErr(w, http.StatusInternalServerError, "failed to scan choices")
+				return
+			}
+			if q, ok := questionMap[qID]; ok {
+				q.Choices = append(q.Choices, choice)
+			}
 		}
 	}
+
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
@@ -134,10 +251,42 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "invalid request")
 		return
 	}
+	if req.Email == "" || req.Password == "" || req.DisplayName == "" {
+		writeErr(w, http.StatusBadRequest, "email, password, displayName are required")
+		return
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to hash password")
+		return
+	}
+
+	var user User
+	err = s.db.QueryRow(
+		`INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3) RETURNING id, email, display_name`,
+		req.Email,
+		string(hashed),
+		req.DisplayName,
+	).Scan(&user.ID, &user.Email, &user.DisplayName)
+	if err != nil {
+		if isUniqueViolation(err) {
+			writeErr(w, http.StatusConflict, "email already exists")
+			return
+		}
+		writeErr(w, http.StatusInternalServerError, "failed to create user")
+		return
+	}
+
+	token, err := s.issueToken(int64(user.ID), user.Email)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to issue token")
+		return
+	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{
-		"token": "dev-token",
-		"user":  User{ID: 1, Email: req.Email, DisplayName: req.DisplayName},
+		"token": token,
+		"user":  user,
 	})
 }
 
@@ -151,14 +300,61 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var user User
+	var passwordHash string
+	err := s.db.QueryRow(
+		`SELECT id, email, display_name, password_hash FROM users WHERE email = $1`,
+		req.Email,
+	).Scan(&user.ID, &user.Email, &user.DisplayName, &passwordHash)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load user")
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
+		writeErr(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+
+	token, err := s.issueToken(int64(user.ID), user.Email)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to issue token")
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"token": "dev-token",
-		"user":  User{ID: 1, Email: req.Email, DisplayName: "ゲストユーザー"},
+		"token": token,
+		"user":  user,
 	})
 }
 
-func (s *Server) me(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, User{ID: 1, Email: "demo@taxpedia.local", DisplayName: "デモユーザー"})
+func (s *Server) me(w http.ResponseWriter, r *http.Request) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var user User
+	err = s.db.QueryRow(`SELECT id, email, display_name FROM users WHERE id = $1`, claims.UserID).Scan(
+		&user.ID,
+		&user.Email,
+		&user.DisplayName,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusUnauthorized, "user not found")
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load user")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, user)
 }
 
 func (s *Server) submitQuiz(w http.ResponseWriter, r *http.Request) {
@@ -170,35 +366,198 @@ func (s *Server) submitQuiz(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "invalid request")
 		return
 	}
-
-	for _, q := range quizQuestions {
-		if q.ID == req.QuestionID {
-			writeJSON(w, http.StatusOK, map[string]any{
-				"correct":     req.SelectedChoiceID == q.AnswerID,
-				"explanation": q.Explanation,
-			})
-			return
-		}
+	if req.QuestionID == 0 || req.SelectedChoiceID == 0 {
+		writeErr(w, http.StatusBadRequest, "questionId and selectedChoiceId are required")
+		return
 	}
 
-	writeErr(w, http.StatusNotFound, "question not found")
+	var correctChoiceID int
+	var explanation string
+	err := s.db.QueryRow(
+		`SELECT qq.explanation, qc.id
+FROM quiz_questions qq
+JOIN quiz_choices qc ON qc.question_id = qq.id AND qc.is_correct = TRUE
+WHERE qq.id = $1`,
+		req.QuestionID,
+	).Scan(&explanation, &correctChoiceID)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusNotFound, "question not found")
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to submit quiz")
+		return
+	}
+
+	isCorrect := req.SelectedChoiceID == correctChoiceID
+
+	if claims, err := s.parseAuth(r); err == nil {
+		_, _ = s.db.Exec(
+			`INSERT INTO user_quiz_results (user_id, question_id, selected_choice_id, is_correct) VALUES ($1, $2, $3, $4)`,
+			claims.UserID,
+			req.QuestionID,
+			req.SelectedChoiceID,
+			isCorrect,
+		)
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"correct": isCorrect, "explanation": explanation})
 }
 
-func (s *Server) userProgress(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) userProgress(w http.ResponseWriter, r *http.Request) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var completedCourses int
+	err = s.db.QueryRow(
+		`SELECT COUNT(DISTINCT l.course_id)
+FROM user_lesson_progress ulp
+JOIN lessons l ON l.id = ulp.lesson_id
+WHERE ulp.user_id = $1 AND ulp.status = 'completed'`,
+		claims.UserID,
+	).Scan(&completedCourses)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load progress")
+		return
+	}
+
+	var earnedBadges int
+	err = s.db.QueryRow(`SELECT COUNT(*) FROM user_badges WHERE user_id = $1`, claims.UserID).Scan(&earnedBadges)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load badges")
+		return
+	}
+
+	streakDays, err := s.calculateStreakDays(claims.UserID)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to calculate streak")
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]int{
-		"completedCourses": 2,
-		"streakDays":       7,
-		"earnedBadges":     3,
+		"completedCourses": completedCourses,
+		"streakDays":       streakDays,
+		"earnedBadges":     earnedBadges,
 	})
 }
 
-func (s *Server) userBadges(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]any{
-		"items": []Badge{
-			{ID: 1, Name: "入門コース修了", Icon: "🌱"},
-			{ID: 2, Name: "7日連続学習", Icon: "🔥"},
-		},
-	})
+func (s *Server) userBadges(w http.ResponseWriter, r *http.Request) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	rows, err := s.db.Query(
+		`SELECT b.id, b.name, b.icon
+FROM user_badges ub
+JOIN badges b ON b.id = ub.badge_id
+WHERE ub.user_id = $1
+ORDER BY ub.earned_at DESC`,
+		claims.UserID,
+	)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load badges")
+		return
+	}
+	defer rows.Close()
+
+	items := make([]Badge, 0)
+	for rows.Next() {
+		var b Badge
+		if err := rows.Scan(&b.ID, &b.Name, &b.Icon); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan badges")
+			return
+		}
+		items = append(items, b)
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func isUniqueViolation(err error) bool {
+	pqErr, ok := err.(*pq.Error)
+	if !ok {
+		return false
+	}
+	return pqErr.Code == "23505"
+}
+
+func (s *Server) upsertLessonProgress(userID int64, lessonID int64, status string, completedAt *time.Time) error {
+	_, err := s.db.Exec(
+		`INSERT INTO user_lesson_progress (user_id, lesson_id, status, completed_at, updated_at)
+VALUES ($1, $2, $3, $4, NOW())
+ON CONFLICT (user_id, lesson_id)
+DO UPDATE SET
+  status = EXCLUDED.status,
+  completed_at = EXCLUDED.completed_at,
+  updated_at = NOW()`,
+		userID,
+		lessonID,
+		status,
+		completedAt,
+	)
+	return err
+}
+
+func (s *Server) calculateStreakDays(userID int64) (int, error) {
+	rows, err := s.db.Query(
+		`SELECT day FROM (
+  SELECT DATE(updated_at) AS day FROM user_lesson_progress WHERE user_id = $1
+  UNION
+  SELECT DATE(answered_at) AS day FROM user_quiz_results WHERE user_id = $1
+) days ORDER BY day DESC`,
+		userID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	days := make([]time.Time, 0)
+	for rows.Next() {
+		var day time.Time
+		if err := rows.Scan(&day); err != nil {
+			return 0, err
+		}
+		days = append(days, day)
+	}
+
+	if len(days) == 0 {
+		return 0, nil
+	}
+
+	today := truncateToDate(time.Now())
+	first := truncateToDate(days[0])
+	if first.Before(today.AddDate(0, 0, -1)) {
+		return 0, nil
+	}
+
+	streak := 1
+	prev := first
+	for i := 1; i < len(days); i++ {
+		curr := truncateToDate(days[i])
+		diff := int(prev.Sub(curr).Hours() / 24)
+		if diff == 1 {
+			streak++
+			prev = curr
+			continue
+		}
+		if diff == 0 {
+			continue
+		}
+		break
+	}
+
+	return streak, nil
+}
+
+func truncateToDate(t time.Time) time.Time {
+	y, m, d := t.Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
