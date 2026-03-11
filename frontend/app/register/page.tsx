@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { Header } from "@/components/header";
+import { PasswordInput } from "@/components/password-input";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -14,11 +15,16 @@ export default function RegisterPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (password !== passwordConfirm) {
+      setError("パスワードが一致していません");
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -59,13 +65,22 @@ export default function RegisterPage() {
           </label>
           <label>
             パスワード
-            <input
-              type="password"
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
               placeholder="8文字以上"
               required
               minLength={8}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            パスワード（確認）
+            <PasswordInput
+              value={passwordConfirm}
+              onChange={setPasswordConfirm}
+              placeholder="もう一度入力してください"
+              required
+              minLength={8}
             />
           </label>
           {error && <p className="tp-error">{error}</p>}

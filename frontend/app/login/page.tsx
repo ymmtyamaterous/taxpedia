@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/auth-provider";
 import { Header } from "@/components/header";
+import { PasswordInput } from "@/components/password-input";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -48,13 +49,12 @@ export default function LoginPage() {
           </label>
           <label>
             パスワード
-            <input
-              type="password"
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
               placeholder="8文字以上"
               required
               minLength={8}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
             />
           </label>
           {error && <p className="tp-error">{error}</p>}
