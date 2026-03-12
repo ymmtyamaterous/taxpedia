@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -274,6 +275,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 			writeErr(w, http.StatusConflict, "email already exists")
 			return
 		}
+		log.Printf("register: db error: %v", err)
 		writeErr(w, http.StatusInternalServerError, "failed to create user")
 		return
 	}

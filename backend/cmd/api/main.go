@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/ymmtyamaterous/taxpedia-api/internal/config"
+	"github.com/ymmtyamaterous/taxpedia-api/internal/migrate"
 	"github.com/ymmtyamaterous/taxpedia-api/internal/server"
 )
 
@@ -29,6 +30,10 @@ func main() {
 
 	if err := db.Ping(); err != nil {
 		log.Fatalf("failed to ping database: %v", err)
+	}
+
+	if err := migrate.RunUp(db, "./migrations"); err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
 	}
 
 	srv := server.New(cfg.AllowedOrigins, db, cfg.JWTSecret)
