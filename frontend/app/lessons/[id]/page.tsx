@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Header } from "@/components/header";
-import { lessons } from "@/lib/mock-data";
+import { getLessonApi } from "@/lib/api-client";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -11,9 +11,15 @@ type Props = {
 export default async function LessonPage({ params }: Props) {
   const { id } = await params;
   const lessonId = Number(id);
-  const lesson = lessons.find((item) => item.id === lessonId);
 
-  if (Number.isNaN(lessonId) || !lesson) {
+  if (Number.isNaN(lessonId)) {
+    notFound();
+  }
+
+  let lesson;
+  try {
+    lesson = await getLessonApi(lessonId);
+  } catch {
     notFound();
   }
 

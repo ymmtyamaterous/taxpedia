@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/header";
 import { LevelBadge } from "@/components/level-badge";
-import { courses, lessons } from "@/lib/mock-data";
+import { getCourseApi, getCourseLessonsApi } from "@/lib/api-client";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -12,13 +12,21 @@ type Props = {
 export default async function CourseDetailPage({ params }: Props) {
   const { id } = await params;
   const courseId = Number(id);
-  const course = courses.find((item) => item.id === courseId);
 
-  if (Number.isNaN(courseId) || !course) {
+  if (Number.isNaN(courseId)) {
     notFound();
   }
 
-  const courseLessons = lessons.filter((lesson) => lesson.courseId === courseId);
+  let course;
+  let courseLessons;
+  try {
+    [course, { items: courseLessons }] = await Promise.all([
+      getCourseApi(courseId),
+      getCourseLessonsApi(courseId),
+    ]);
+  } catch {
+    notFound();
+  }
 
   return (
     <div className="tp-page">

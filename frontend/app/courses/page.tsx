@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import { Header } from "@/components/header";
 import { LevelBadge } from "@/components/level-badge";
-import { courses } from "@/lib/mock-data";
+import { getCoursesApi } from "@/lib/api-client";
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const { items: courses } = await getCoursesApi();
+
   return (
     <div className="tp-page">
       <Header />

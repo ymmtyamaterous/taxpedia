@@ -1,4 +1,4 @@
-import { AuthResponse, AuthUser, Badge, UserProgress } from "@/lib/auth-types";
+import { AuthResponse, AuthUser, Badge, Course, Lesson, QuizQuestion, UserProgress } from "@/lib/auth-types";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
@@ -68,4 +68,37 @@ export async function myProgressApi(token: string): Promise<UserProgress> {
 
 export async function myBadgesApi(token: string): Promise<{ items: Badge[] }> {
   return request<{ items: Badge[] }>("/api/users/me/badges", "GET", undefined, token);
+}
+
+export async function getCoursesApi(): Promise<{ items: Course[] }> {
+  return request<{ items: Course[] }>("/api/courses", "GET");
+}
+
+export async function getCourseApi(id: number): Promise<Course> {
+  return request<Course>(`/api/courses/${id}`, "GET");
+}
+
+export async function getCourseLessonsApi(courseId: number): Promise<{ items: Lesson[] }> {
+  return request<{ items: Lesson[] }>(`/api/courses/${courseId}/lessons`, "GET");
+}
+
+export async function getLessonApi(id: number): Promise<Lesson> {
+  return request<Lesson>(`/api/lessons/${id}`, "GET");
+}
+
+export async function getLessonQuizApi(lessonId: number): Promise<{ items: QuizQuestion[] }> {
+  return request<{ items: QuizQuestion[] }>(`/api/lessons/${lessonId}/quiz`, "GET");
+}
+
+export async function submitQuizApi(
+  questionId: number,
+  selectedChoiceId: number,
+  token?: string,
+): Promise<{ correct: boolean; explanation: string }> {
+  return request<{ correct: boolean; explanation: string }>(
+    "/api/quiz/submit",
+    "POST",
+    { questionId, selectedChoiceId },
+    token,
+  );
 }
