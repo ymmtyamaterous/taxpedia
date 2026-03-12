@@ -90,6 +90,18 @@ export async function getLessonQuizApi(lessonId: number): Promise<{ items: QuizQ
   return request<{ items: QuizQuestion[] }>(`/api/lessons/${lessonId}/quiz`, "GET");
 }
 
+export async function startLessonApi(
+  lessonId: number,
+  token: string,
+): Promise<void> {
+  await request<{ lessonId: number; status: string }>(
+    `/api/lessons/${lessonId}/start`,
+    "POST",
+    undefined,
+    token,
+  );
+}
+
 export async function submitQuizApi(
   questionId: number,
   selectedChoiceId: number,
