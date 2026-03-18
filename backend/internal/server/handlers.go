@@ -203,16 +203,16 @@ func (s *Server) getLessonQuiz(w http.ResponseWriter, lessonID int) {
 
 	items := make([]QuizQuestion, 0)
 	questionIDs := make([]int, 0)
-	questionMap := make(map[int]*QuizQuestion)
+	questionIndexMap := make(map[int]int) // questionID → index in items
 	for qRows.Next() {
 		q := QuizQuestion{Choices: make([]QuizChoice, 0)}
 		if err := qRows.Scan(&q.ID, &q.LessonID, &q.Question, &q.Explanation); err != nil {
 			writeErr(w, http.StatusInternalServerError, "failed to scan quiz")
 			return
 		}
+		questionIndexMap[q.ID] = len(items)
 		items = append(items, q)
 		questionIDs = append(questionIDs, q.ID)
-		questionMap[q.ID] = &items[len(items)-1]
 	}
 
 	if len(questionIDs) > 0 {
@@ -233,8 +233,8 @@ func (s *Server) getLessonQuiz(w http.ResponseWriter, lessonID int) {
 				writeErr(w, http.StatusInternalServerError, "failed to scan choices")
 				return
 			}
-			if q, ok := questionMap[qID]; ok {
-				q.Choices = append(q.Choices, choice)
+			if idx, ok := questionIndexMap[qID]; ok {
+				items[idx].Choices = append(items[idx].Choices, choice)
 			}
 		}
 	}
