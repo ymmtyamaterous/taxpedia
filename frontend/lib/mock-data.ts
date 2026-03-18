@@ -70,14 +70,29 @@ export const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
     lessonId: 1,
-    question: "所得税は何を基準に計算されますか？",
-    explanation: "収入から各種控除を引いた課税所得に税率を適用して計算します。",
+    question: "税金の主な役割として最も適切なものはどれですか？",
+    explanation:
+      "税金は道路・学校・病院など私たちの日常生活を支える社会インフラや公共サービスの財源です。「社会サービスへの会費」と考えると、税金の意義が理解しやすくなります。",
     answerId: 2,
     choices: [
-      { id: 1, label: "A", text: "総支給額" },
-      { id: 2, label: "B", text: "課税所得" },
-      { id: 3, label: "C", text: "手取り金額" },
-      { id: 4, label: "D", text: "会社が自由に決める" },
+      { id: 1, label: "A", text: "一部の富裕層に分配するため" },
+      { id: 2, label: "B", text: "道路・学校・医療など社会サービスを維持するため" },
+      { id: 3, label: "C", text: "大企業の経営を支援するため" },
+      { id: 4, label: "D", text: "政府の貯蓄として積み立てるため" },
+    ],
+  },
+  {
+    id: 26,
+    lessonId: 1,
+    question: "日本の税金のうち、都道府県や市区町村に納める税を何と言いますか？",
+    explanation:
+      "日本の税金は国に納める「国税」と都道府県・市区町村に納める「地方税」の2種類に分けられます。地方税は地域の道路整備・ゴミ収集・地元の学校運営などに使われます。",
+    answerId: 103,
+    choices: [
+      { id: 101, label: "A", text: "国税" },
+      { id: 102, label: "B", text: "直接税" },
+      { id: 103, label: "C", text: "地方税" },
+      { id: 104, label: "D", text: "消費税" },
     ],
   },
 ];
