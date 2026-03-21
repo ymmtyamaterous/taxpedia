@@ -268,13 +268,149 @@ a {
   align-items: center;
 }
 
+.tp-lesson-list-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.tp-progress-badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tp-progress-completed {
+  background: var(--green-pale);
+  color: var(--green-dark);
+}
+
+.tp-progress-in-progress {
+  background: #fff3cd;
+  color: #7a5c00;
+}
+
 .tp-article article {
   margin-top: 0.8rem;
   line-height: 1.8;
 }
 
+/* ━━ MARKDOWN ━━ */
+
+.tp-markdown {
+  line-height: 1.8;
+}
+
+.tp-markdown h1,
+.tp-markdown h2,
+.tp-markdown h3,
+.tp-markdown h4 {
+  font-weight: 800;
+  color: var(--ink);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tp-markdown h1 { font-size: 1.5rem; }
+.tp-markdown h2 { font-size: 1.25rem; }
+.tp-markdown h3 { font-size: 1.1rem; }
+
+.tp-markdown p {
+  margin-top: 0.6rem;
+}
+
+.tp-markdown ul,
+.tp-markdown ol {
+  margin-top: 0.6rem;
+  padding-left: 1.4rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.tp-markdown li {
+  list-style: disc;
+}
+
+.tp-markdown ol li {
+  list-style: decimal;
+}
+
+.tp-markdown strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tp-markdown em {
+  font-style: italic;
+}
+
+.tp-markdown code {
+  background: var(--green-pale);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.88em;
+  font-family: var(--font-mono), monospace;
+}
+
+.tp-markdown pre {
+  background: #1e2a22;
+  color: #d4f5e2;
+  border-radius: 10px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-top: 0.8rem;
+}
+
+.tp-markdown pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.tp-markdown blockquote {
+  border-left: 4px solid var(--green-main);
+  margin-left: 0;
+  padding-left: 1rem;
+  color: var(--gray);
+  margin-top: 0.8rem;
+}
+
+.tp-markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+.tp-markdown th,
+.tp-markdown td {
+  border: 1.5px solid var(--border);
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+}
+
+.tp-markdown th {
+  background: var(--green-pale);
+  font-weight: 700;
+}
+
+.tp-markdown img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-top: 0.8rem;
+}
+
+.tp-markdown a {
+  color: var(--green-dark);
+  text-decoration: underline;
+}
+
 .tp-choice-list {
   margin-top: 0.8rem;
+  margin-bottom: 1rem;
   display: grid;
   gap: 0.6rem;
 }
@@ -308,6 +444,74 @@ a {
 
 .tp-feedback.ng {
   background: #fee4e2;
+}
+
+.tp-ai-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: #7a5c00;
+  line-height: 1.6;
+}
+
+.tp-ai-notice-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ━━ MEMO ━━ */
+
+.tp-memo {
+  margin-top: 1.5rem;
+  border: 2px solid var(--green-pale);
+  border-radius: 16px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.tp-memo-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.tp-memo-textarea {
+  width: 100%;
+  border: 2px solid var(--green-pale);
+  border-radius: 10px;
+  padding: 0.6rem;
+  color: var(--ink);
+  background: var(--green-bg);
+  resize: vertical;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+
+.tp-memo-textarea:focus {
+  outline: none;
+  border-color: var(--green-main);
+}
+
+.tp-memo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.7rem;
+}
+
+.tp-memo-save-msg {
+  font-size: 0.88rem;
+  color: var(--green-dark);
+  font-weight: 600;
 }
 
 .tp-auth {
@@ -1001,4 +1205,77 @@ a {
   .lp-account-compare { flex-direction: column; }
   .lp-footer { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
   .lp-cta-section { padding: 5rem 1.5rem; }
+}
+
+/* ━━ GLOSSARY ━━ */
+
+.tp-glossary-search {
+  margin-top: 1.2rem;
+}
+
+.tp-glossary-search-input {
+  width: 100%;
+  max-width: 480px;
+  border: 2px solid var(--green-pale);
+  border-radius: 9999px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.tp-glossary-search-input:focus {
+  outline: none;
+  border-color: var(--green-main);
+}
+
+.tp-glossary-section {
+  margin-top: 1.8rem;
+}
+
+.tp-glossary-category {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  border-left: 4px solid var(--green-main);
+  padding-left: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.tp-glossary-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.tp-glossary-item {
+  background: #fff;
+  border: 2px solid var(--green-pale);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+}
+
+.tp-glossary-term-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.tp-glossary-term {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.tp-glossary-reading {
+  font-size: 0.82rem;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.tp-glossary-definition {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.75;
 }

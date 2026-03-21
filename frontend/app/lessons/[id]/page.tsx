@@ -30,6 +30,10 @@ export default async function LessonPage({ params }: Props) {
       <main className="tp-container tp-article">
         <h1 className="tp-title">{lesson.title}</h1>
         <p className="tp-lead">目安: {lesson.estimatedMinutes}分</p>
+        <div className="tp-ai-notice">
+          <span className="tp-ai-notice-icon">⚠️</span>
+          <span>本コンテンツはAIによって生成された情報を含んでいます。内容の正確性にご注意の上、重要な判断は必ず公式情報をご確認ください。</span>
+        </div>
         <LessonViewer lesson={lesson} />
         <div className="tp-actions">
           <Link href={`/quiz/${lesson.id}`} className="tp-primary-btn">

@@ -41,3 +41,20 @@ type User struct {
 	Email       string `json:"email"`
 	DisplayName string `json:"displayName"`
 }
+type LessonProgressItem struct {
+	LessonID int    `json:"lessonId"`
+	Status   string `json:"status"`
+}
+
+type LessonMemo struct {
+	LessonID int    `json:"lessonId"`
+	Content  string `json:"content"`
+}
+
+type GlossaryTerm struct {
+	ID         int    `json:"id"`
+	Term       string `json:"term"`
+	Reading    string `json:"reading"`
+	Definition string `json:"definition"`
+	Category   string `json:"category"`
+}

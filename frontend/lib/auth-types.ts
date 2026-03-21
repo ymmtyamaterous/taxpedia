@@ -51,3 +51,21 @@ export type Badge = {
   name: string;
   icon: string;
 };
+
+export type LessonProgressItem = {
+  lessonId: number;
+  status: "in_progress" | "completed";
+};
+
+export type LessonMemo = {
+  lessonId: number;
+  content: string;
+};
+
+export type GlossaryTerm = {
+  id: number;
+  term: string;
+  reading: string;
+  definition: string;
+  category: string;
+};

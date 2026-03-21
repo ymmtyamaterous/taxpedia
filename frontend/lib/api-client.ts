@@ -1,10 +1,10 @@
-import { AuthResponse, AuthUser, Badge, Course, Lesson, QuizQuestion, UserProgress } from "@/lib/auth-types";
+import { AuthResponse, AuthUser, Badge, Course, GlossaryTerm, Lesson, LessonMemo, LessonProgressItem, QuizQuestion, UserProgress } from "@/lib/auth-types";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
   "http://localhost:8080";
 
-type HttpMethod = "GET" | "POST";
+type HttpMethod = "GET" | "POST" | "PUT";
 
 async function request<T>(
   path: string,
@@ -113,4 +113,39 @@ export async function submitQuizApi(
     { questionId, selectedChoiceId },
     token,
   );
+}
+
+export async function getUserLessonProgressApi(
+  token: string,
+): Promise<{ items: LessonProgressItem[] }> {
+  return request<{ items: LessonProgressItem[] }>(
+    "/api/users/me/lesson-progress",
+    "GET",
+    undefined,
+    token,
+  );
+}
+
+export async function getLessonMemoApi(
+  lessonId: number,
+  token: string,
+): Promise<LessonMemo> {
+  return request<LessonMemo>(`/api/lessons/${lessonId}/memo`, "GET", undefined, token);
+}
+
+export async function saveLessonMemoApi(
+  lessonId: number,
+  content: string,
+  token: string,
+): Promise<LessonMemo> {
+  return request<LessonMemo>(`/api/lessons/${lessonId}/memo`, "PUT", { content }, token);
+}
+
+export async function getGlossaryApi(q?: string): Promise<{ items: GlossaryTerm[] }> {
+  const path = q ? `/api/glossary?q=${encodeURIComponent(q)}` : "/api/glossary";
+  return request<{ items: GlossaryTerm[] }>(path, "GET");
+}
+
+export async function getGlossaryTermApi(id: number): Promise<GlossaryTerm> {
+  return request<GlossaryTerm>(`/api/glossary/${id}`, "GET");
 }

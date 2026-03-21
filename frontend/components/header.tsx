@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 
 const navItems = [
   { href: "/courses", label: "コース" },
+  { href: "/glossary", label: "用語辞典" },
   { href: "/mypage", label: "マイページ" },
 ];
 

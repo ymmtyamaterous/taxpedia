@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { getLessonQuizApi, submitQuizApi } from "@/lib/api-client";
@@ -8,6 +9,7 @@ import type { QuizQuestion } from "@/lib/auth-types";
 
 type Props = {
   lessonId: number;
+  courseId: number;
 };
 
 type AnswerResult = {
@@ -15,7 +17,7 @@ type AnswerResult = {
   explanation: string;
 };
 
-export function QuizClient({ lessonId }: Props) {
+export function QuizClient({ lessonId, courseId }: Props) {
   const { token } = useAuth();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +77,14 @@ export function QuizClient({ lessonId }: Props) {
         <p className="tp-lead">
           {questions.length}問中 <strong>{score}問</strong> 正解しました。
         </p>
+        <div className="tp-actions" style={{ marginTop: "1.2rem" }}>
+          <Link href={`/courses/${courseId}`} className="tp-primary-btn">
+            レッスン一覧に戻る
+          </Link>
+          <Link href="/courses" className="tp-link-btn">
+            コース一覧へ
+          </Link>
+        </div>
       </section>
     );
   }
