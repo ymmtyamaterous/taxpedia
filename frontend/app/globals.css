@@ -312,7 +312,8 @@ a {
 /* ━━ MARKDOWN ━━ */
 
 .tp-markdown {
-  line-height: 1.8;
+  line-height: 1.85;
+  color: var(--ink);
 }
 
 .tp-markdown h1,
@@ -320,59 +321,116 @@ a {
 .tp-markdown h3,
 .tp-markdown h4 {
   font-weight: 800;
-  color: var(--ink);
-  margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
-.tp-markdown h1 { font-size: 1.5rem; }
-.tp-markdown h2 { font-size: 1.25rem; }
-.tp-markdown h3 { font-size: 1.1rem; }
+.tp-markdown h1 {
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-top: 2rem;
+}
+
+.tp-markdown h2 {
+  font-size: 1.18rem;
+  color: var(--green-dark);
+  margin-top: 2.2rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2.5px solid var(--green-pale);
+}
+
+.tp-markdown h3 {
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-top: 1.4rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--green-main);
+}
+
+.tp-markdown h4 {
+  font-size: 0.97rem;
+  color: var(--gray);
+  margin-top: 1.1rem;
+}
 
 .tp-markdown p {
-  margin-top: 0.6rem;
+  margin-top: 0.7rem;
 }
 
 .tp-markdown ul,
 .tp-markdown ol {
-  margin-top: 0.6rem;
-  padding-left: 1.4rem;
+  margin-top: 0.7rem;
+  padding-left: 0;
   display: grid;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
-.tp-markdown li {
-  list-style: disc;
+.tp-markdown ul > li {
+  list-style: none;
+  padding-left: 1.5rem;
+  position: relative;
 }
 
-.tp-markdown ol li {
-  list-style: decimal;
+.tp-markdown ul > li::before {
+  content: "▸";
+  position: absolute;
+  left: 0.15rem;
+  color: var(--green-main);
+  font-weight: 800;
+}
+
+.tp-markdown ol {
+  counter-reset: ol-counter;
+}
+
+.tp-markdown ol > li {
+  list-style: none;
+  counter-increment: ol-counter;
+  padding-left: 2.1rem;
+  position: relative;
+}
+
+.tp-markdown ol > li::before {
+  content: counter(ol-counter);
+  position: absolute;
+  left: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--green-main);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.5rem;
+  top: 0.15rem;
 }
 
 .tp-markdown strong {
-  font-weight: 700;
-  color: var(--ink);
+  font-weight: 800;
+  color: var(--green-dark);
 }
 
 .tp-markdown em {
   font-style: italic;
+  color: var(--gray);
 }
 
 .tp-markdown code {
   background: var(--green-pale);
-  border-radius: 4px;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.88em;
+  border-radius: 5px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.87em;
   font-family: var(--font-mono), monospace;
+  color: var(--green-dark);
 }
 
 .tp-markdown pre {
   background: #1e2a22;
   color: #d4f5e2;
-  border-radius: 10px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 1.1rem;
   overflow-x: auto;
-  margin-top: 0.8rem;
+  margin-top: 1rem;
 }
 
 .tp-markdown pre code {
@@ -382,40 +440,123 @@ a {
 }
 
 .tp-markdown blockquote {
+  background: linear-gradient(to right, rgba(212, 245, 226, 0.8), rgba(240, 250, 244, 0.3));
   border-left: 4px solid var(--green-main);
-  margin-left: 0;
-  padding-left: 1rem;
-  color: var(--gray);
-  margin-top: 0.8rem;
+  border-radius: 0 14px 14px 0;
+  margin: 1.1rem 0;
+  padding: 0.9rem 1.1rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.tp-markdown blockquote p {
+  margin-top: 0;
+}
+
+.tp-markdown blockquote p + p {
+  margin-top: 0.4rem;
+}
+
+.tp-markdown blockquote strong {
+  color: var(--green-dark);
 }
 
 .tp-markdown table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
-  margin-top: 0.8rem;
-}
-
-.tp-markdown th,
-.tp-markdown td {
-  border: 1.5px solid var(--border);
-  padding: 0.5rem 0.8rem;
-  text-align: left;
+  margin-top: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--green-pale);
 }
 
 .tp-markdown th {
   background: var(--green-pale);
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--green-dark);
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.tp-markdown td {
+  padding: 0.55rem 0.9rem;
+  border-top: 1.5px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.tp-markdown tr:nth-child(even) td {
+  background: var(--green-bg);
 }
 
 .tp-markdown img {
   max-width: 100%;
-  border-radius: 10px;
-  margin-top: 0.8rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .tp-markdown a {
   color: var(--green-dark);
   text-decoration: underline;
+  font-weight: 600;
+}
+
+.tp-markdown hr {
+  border: none;
+  border-top: 2px dashed var(--green-pale);
+  margin: 1.5rem 0;
+}
+
+/* ━━ LESSON HERO ━━ */
+
+.tp-lesson-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: linear-gradient(135deg, var(--green-pale) 0%, rgba(240, 250, 244, 0.4) 100%);
+  border: 2px solid var(--green-pale);
+  border-radius: 20px;
+  padding: 1.4rem 1.8rem;
+  margin-top: 1.2rem;
+}
+
+.tp-lesson-hero-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.7rem;
+  box-shadow: 0 4px 16px rgba(45, 158, 96, 0.15);
+}
+
+.tp-lesson-hero-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-lesson-hero-body .tp-title {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.tp-lesson-hero-body .tp-lead {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+@media (max-width: 600px) {
+  .tp-lesson-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.2rem;
+    gap: 0.8rem;
+  }
 }
 
 .tp-choice-list {
