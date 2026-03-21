@@ -102,6 +102,18 @@ export async function startLessonApi(
   );
 }
 
+export async function completeLessonApi(
+  lessonId: number,
+  token: string,
+): Promise<void> {
+  await request<{ lessonId: number; status: string }>(
+    `/api/lessons/${lessonId}/complete`,
+    "POST",
+    undefined,
+    token,
+  );
+}
+
 export async function submitQuizApi(
   questionId: number,
   selectedChoiceId: number,
