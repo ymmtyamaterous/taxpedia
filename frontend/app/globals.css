@@ -219,6 +219,16 @@ a {
   border: 2px solid #fecdca;
 }
 
+/* .tp-actions ・.tp-form ・.tp-memo-actions の外でスタンドアロンに置かれるボタンに上マージンを付与 */
+.tp-card > .tp-primary-btn,
+.tp-card > .tp-link-btn,
+.tp-card > .tp-danger-btn,
+.tp-container > .tp-primary-btn,
+.tp-container > .tp-link-btn,
+.tp-container > .tp-danger-btn {
+  margin-top: 0.8rem;
+}
+
 .tp-bullet {
   margin-top: 0.7rem;
   display: grid;
@@ -434,6 +444,7 @@ a {
 
 .tp-feedback {
   margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
   padding: 0.7rem;
   border-radius: 12px;
 }
