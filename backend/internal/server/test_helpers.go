@@ -39,7 +39,13 @@ func NewTestServer(t *testing.T) *Server {
 		t.Fatalf("migrate: %v", err)
 	}
 
+	// テスト前後にユーザーデータをクリーンアップする
+	_, _ = db.Exec(`DELETE FROM users WHERE email LIKE '%@example.com'`)
+	t.Cleanup(func() {
+		_, _ = db.Exec(`DELETE FROM users WHERE email LIKE '%@example.com'`)
+		db.Close()
+	})
+
 	srv := New("http://localhost:3000", db, "test-secret")
-	t.Cleanup(func() { db.Close() })
 	return srv
 }

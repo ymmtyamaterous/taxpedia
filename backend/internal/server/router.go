@@ -39,6 +39,9 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /api/quiz/submit", s.submitQuiz)
 	s.mux.HandleFunc("GET /api/users/me/progress", s.userProgress)
 	s.mux.HandleFunc("GET /api/users/me/badges", s.userBadges)
+	s.mux.HandleFunc("GET /api/users/me/lesson-progress", s.userLessonProgress)
+	s.mux.HandleFunc("GET /api/glossary", s.getGlossaryTerms)
+	s.mux.HandleFunc("/api/glossary/", s.glossaryRoute)
 }
 
 func withCORS(next http.Handler, allowedOrigins string) http.Handler {

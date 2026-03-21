@@ -219,6 +219,16 @@ a {
   border: 2px solid #fecdca;
 }
 
+/* .tp-actions ・.tp-form ・.tp-memo-actions の外でスタンドアロンに置かれるボタンに上マージンを付与 */
+.tp-card > .tp-primary-btn,
+.tp-card > .tp-link-btn,
+.tp-card > .tp-danger-btn,
+.tp-container > .tp-primary-btn,
+.tp-container > .tp-link-btn,
+.tp-container > .tp-danger-btn {
+  margin-top: 0.8rem;
+}
+
 .tp-bullet {
   margin-top: 0.7rem;
   display: grid;
@@ -268,13 +278,290 @@ a {
   align-items: center;
 }
 
+.tp-lesson-list-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.tp-progress-badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tp-progress-completed {
+  background: var(--green-pale);
+  color: var(--green-dark);
+}
+
+.tp-progress-in-progress {
+  background: #fff3cd;
+  color: #7a5c00;
+}
+
 .tp-article article {
   margin-top: 0.8rem;
   line-height: 1.8;
 }
 
+/* ━━ MARKDOWN ━━ */
+
+.tp-markdown {
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.tp-markdown h1,
+.tp-markdown h2,
+.tp-markdown h3,
+.tp-markdown h4 {
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.tp-markdown h1 {
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-top: 2rem;
+}
+
+.tp-markdown h2 {
+  font-size: 1.18rem;
+  color: var(--green-dark);
+  margin-top: 2.2rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2.5px solid var(--green-pale);
+}
+
+.tp-markdown h3 {
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-top: 1.4rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--green-main);
+}
+
+.tp-markdown h4 {
+  font-size: 0.97rem;
+  color: var(--gray);
+  margin-top: 1.1rem;
+}
+
+.tp-markdown p {
+  margin-top: 0.7rem;
+}
+
+.tp-markdown ul,
+.tp-markdown ol {
+  margin-top: 0.7rem;
+  padding-left: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.tp-markdown ul > li {
+  list-style: none;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.tp-markdown ul > li::before {
+  content: "▸";
+  position: absolute;
+  left: 0.15rem;
+  color: var(--green-main);
+  font-weight: 800;
+}
+
+.tp-markdown ol {
+  counter-reset: ol-counter;
+}
+
+.tp-markdown ol > li {
+  list-style: none;
+  counter-increment: ol-counter;
+  padding-left: 2.1rem;
+  position: relative;
+}
+
+.tp-markdown ol > li::before {
+  content: counter(ol-counter);
+  position: absolute;
+  left: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--green-main);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.5rem;
+  top: 0.15rem;
+}
+
+.tp-markdown strong {
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+.tp-markdown em {
+  font-style: italic;
+  color: var(--gray);
+}
+
+.tp-markdown code {
+  background: var(--green-pale);
+  border-radius: 5px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.87em;
+  font-family: var(--font-mono), monospace;
+  color: var(--green-dark);
+}
+
+.tp-markdown pre {
+  background: #1e2a22;
+  color: #d4f5e2;
+  border-radius: 12px;
+  padding: 1.1rem;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.tp-markdown pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.tp-markdown blockquote {
+  background: linear-gradient(to right, rgba(212, 245, 226, 0.8), rgba(240, 250, 244, 0.3));
+  border-left: 4px solid var(--green-main);
+  border-radius: 0 14px 14px 0;
+  margin: 1.1rem 0;
+  padding: 0.9rem 1.1rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.tp-markdown blockquote p {
+  margin-top: 0;
+}
+
+.tp-markdown blockquote p + p {
+  margin-top: 0.4rem;
+}
+
+.tp-markdown blockquote strong {
+  color: var(--green-dark);
+}
+
+.tp-markdown table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin-top: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--green-pale);
+}
+
+.tp-markdown th {
+  background: var(--green-pale);
+  font-weight: 800;
+  color: var(--green-dark);
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.tp-markdown td {
+  padding: 0.55rem 0.9rem;
+  border-top: 1.5px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.tp-markdown tr:nth-child(even) td {
+  background: var(--green-bg);
+}
+
+.tp-markdown img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.tp-markdown a {
+  color: var(--green-dark);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.tp-markdown hr {
+  border: none;
+  border-top: 2px dashed var(--green-pale);
+  margin: 1.5rem 0;
+}
+
+/* ━━ LESSON HERO ━━ */
+
+.tp-lesson-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: linear-gradient(135deg, var(--green-pale) 0%, rgba(240, 250, 244, 0.4) 100%);
+  border: 2px solid var(--green-pale);
+  border-radius: 20px;
+  padding: 1.4rem 1.8rem;
+  margin-top: 1.2rem;
+}
+
+.tp-lesson-hero-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.7rem;
+  box-shadow: 0 4px 16px rgba(45, 158, 96, 0.15);
+}
+
+.tp-lesson-hero-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-lesson-hero-body .tp-title {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.tp-lesson-hero-body .tp-lead {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+@media (max-width: 600px) {
+  .tp-lesson-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.2rem;
+    gap: 0.8rem;
+  }
+}
+
 .tp-choice-list {
   margin-top: 0.8rem;
+  margin-bottom: 1rem;
   display: grid;
   gap: 0.6rem;
 }
@@ -298,6 +585,7 @@ a {
 
 .tp-feedback {
   margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
   padding: 0.7rem;
   border-radius: 12px;
 }
@@ -308,6 +596,74 @@ a {
 
 .tp-feedback.ng {
   background: #fee4e2;
+}
+
+.tp-ai-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: #7a5c00;
+  line-height: 1.6;
+}
+
+.tp-ai-notice-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ━━ MEMO ━━ */
+
+.tp-memo {
+  margin-top: 1.5rem;
+  border: 2px solid var(--green-pale);
+  border-radius: 16px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.tp-memo-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.tp-memo-textarea {
+  width: 100%;
+  border: 2px solid var(--green-pale);
+  border-radius: 10px;
+  padding: 0.6rem;
+  color: var(--ink);
+  background: var(--green-bg);
+  resize: vertical;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+
+.tp-memo-textarea:focus {
+  outline: none;
+  border-color: var(--green-main);
+}
+
+.tp-memo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.7rem;
+}
+
+.tp-memo-save-msg {
+  font-size: 0.88rem;
+  color: var(--green-dark);
+  font-weight: 600;
 }
 
 .tp-auth {
@@ -1001,4 +1357,77 @@ a {
   .lp-account-compare { flex-direction: column; }
   .lp-footer { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
   .lp-cta-section { padding: 5rem 1.5rem; }
+}
+
+/* ━━ GLOSSARY ━━ */
+
+.tp-glossary-search {
+  margin-top: 1.2rem;
+}
+
+.tp-glossary-search-input {
+  width: 100%;
+  max-width: 480px;
+  border: 2px solid var(--green-pale);
+  border-radius: 9999px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.tp-glossary-search-input:focus {
+  outline: none;
+  border-color: var(--green-main);
+}
+
+.tp-glossary-section {
+  margin-top: 1.8rem;
+}
+
+.tp-glossary-category {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  border-left: 4px solid var(--green-main);
+  padding-left: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.tp-glossary-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.tp-glossary-item {
+  background: #fff;
+  border: 2px solid var(--green-pale);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+}
+
+.tp-glossary-term-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.tp-glossary-term {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.tp-glossary-reading {
+  font-size: 0.82rem;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.tp-glossary-definition {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.75;
 }

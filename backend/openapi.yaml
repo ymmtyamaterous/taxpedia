@@ -12,6 +12,7 @@ tags:
 	- name: Lessons
 	- name: Quiz
 	- name: Users
+	- name: Glossary
 paths:
 	/api/health:
 		get:
@@ -198,6 +199,53 @@ paths:
 										items:
 											$ref: "#/components/schemas/QuizQuestion"
 								required: [items]
+	/api/lessons/{id}/memo:
+		get:
+			tags: [Lessons]
+			summary: レッスンメモ取得
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/LessonMemo"
+		put:
+			tags: [Lessons]
+			summary: レッスンメモ保存
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			security:
+				- bearerAuth: []
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema:
+							type: object
+							properties:
+								content:
+									type: string
+							required: [content]
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/LessonMemo"
 	/api/quiz/submit:
 		post:
 			tags: [Quiz]
@@ -247,6 +295,66 @@ paths:
 										items:
 											$ref: "#/components/schemas/Badge"
 								required: [items]
+	/api/users/me/lesson-progress:
+		get:
+			tags: [Users]
+			summary: レッスン進捗一覧
+			security:
+				- bearerAuth: []
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/LessonProgressItem"
+								required: [items]
+	/api/glossary:
+		get:
+			tags: [Glossary]
+			summary: 用語一覧
+			parameters:
+				- in: query
+					name: q
+					required: false
+					schema:
+						type: string
+					description: 検索キーワード
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								type: object
+								properties:
+									items:
+										type: array
+										items:
+											$ref: "#/components/schemas/GlossaryTerm"
+								required: [items]
+	/api/glossary/{id}:
+		get:
+			tags: [Glossary]
+			summary: 用語詳細
+			parameters:
+				- in: path
+					name: id
+					required: true
+					schema:
+						type: integer
+			responses:
+				"200":
+					description: OK
+					content:
+						application/json:
+							schema:
+								$ref: "#/components/schemas/GlossaryTerm"
 components:
 	securitySchemes:
 		bearerAuth:
@@ -387,4 +495,34 @@ components:
 					type: integer
 				earnedBadges:
 					type: integer
-			required: [completedCourses, streakDays, earnedBadges]
+			required: [completedCourses, streakDays, earnedBadges]		LessonMemo:
+			type: object
+			properties:
+				lessonId:
+					type: integer
+				content:
+					type: string
+			required: [lessonId, content]
+		LessonProgressItem:
+			type: object
+			properties:
+				lessonId:
+					type: integer
+				status:
+					type: string
+					enum: [in_progress, completed]
+			required: [lessonId, status]
+		GlossaryTerm:
+			type: object
+			properties:
+				id:
+					type: integer
+				term:
+					type: string
+				reading:
+					type: string
+				definition:
+					type: string
+				category:
+					type: string
+			required: [id, term, reading, definition, category]

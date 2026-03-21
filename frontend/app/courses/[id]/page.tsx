@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { LevelBadge } from "@/components/level-badge";
 import { getCourseApi, getCourseLessonsApi } from "@/lib/api-client";
+import { LessonList } from "./lesson-list";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -38,21 +39,7 @@ export default async function CourseDetailPage({ params }: Props) {
 
         <section className="tp-list-section">
           <h2>レッスン</h2>
-          <ul className="tp-list">
-            {courseLessons.length > 0 ? (
-              courseLessons.map((lesson) => (
-                <li key={lesson.id}>
-                  <div>
-                    <strong>{lesson.title}</strong>
-                    <p>{lesson.estimatedMinutes}分</p>
-                  </div>
-                  <Link href={`/lessons/${lesson.id}`}>学習する</Link>
-                </li>
-              ))
-            ) : (
-              <li>このコースのレッスンは準備中です。</li>
-            )}
-          </ul>
+          <LessonList lessons={courseLessons} />
         </section>
       </main>
     </div>

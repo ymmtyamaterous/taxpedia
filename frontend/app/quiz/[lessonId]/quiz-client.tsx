@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { getLessonQuizApi, submitQuizApi } from "@/lib/api-client";
+import { getLessonQuizApi, submitQuizApi, completeLessonApi } from "@/lib/api-client";
 import { useAuth } from "@/components/auth-provider";
 import type { QuizQuestion } from "@/lib/auth-types";
 
 type Props = {
   lessonId: number;
+  courseId: number;
 };
 
 type AnswerResult = {
@@ -15,7 +17,7 @@ type AnswerResult = {
   explanation: string;
 };
 
-export function QuizClient({ lessonId }: Props) {
+export function QuizClient({ lessonId, courseId }: Props) {
   const { token } = useAuth();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +27,8 @@ export function QuizClient({ lessonId }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
   const [score, setScore] = useState(0);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     getLessonQuizApi(lessonId)
@@ -69,12 +73,51 @@ export function QuizClient({ lessonId }: Props) {
   }
 
   if (finished) {
+    const allCorrect = score === questions.length;
+
+    const handleComplete = async () => {
+      if (!token) return;
+      setIsCompleting(true);
+      try {
+        await completeLessonApi(lessonId, token);
+        setIsCompleted(true);
+      } catch {
+        // サイレントに無視（UIに影響させない）
+      } finally {
+        setIsCompleting(false);
+      }
+    };
+
     return (
       <section className="tp-card">
         <h2>クイズ完了！</h2>
         <p className="tp-lead">
           {questions.length}問中 <strong>{score}問</strong> 正解しました。
         </p>
+        {token && allCorrect && (
+          <div style={{ marginTop: "1rem" }}>
+            {isCompleted ? (
+              <p className="tp-feedback ok">✓ このレッスンを学習済みにしました！</p>
+            ) : (
+              <button
+                type="button"
+                className="tp-primary-btn"
+                onClick={handleComplete}
+                disabled={isCompleting}
+              >
+                {isCompleting ? "処理中..." : "✓ 学習済みにする"}
+              </button>
+            )}
+          </div>
+        )}
+        <div className="tp-actions" style={{ marginTop: "1.2rem" }}>
+          <Link href={`/courses/${courseId}`} className="tp-primary-btn">
+            レッスン一覧に戻る
+          </Link>
+          <Link href="/courses" className="tp-link-btn">
+            コース一覧へ
+          </Link>
+        </div>
       </section>
     );
   }

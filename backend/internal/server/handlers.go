@@ -166,6 +166,12 @@ func (s *Server) lessonRoute(w http.ResponseWriter, r *http.Request) {
 		case parts[1] == "quiz" && r.Method == http.MethodGet:
 			s.getLessonQuiz(w, lessonID)
 			return
+		case parts[1] == "memo" && r.Method == http.MethodGet:
+			s.getLessonMemo(w, r, lessonID)
+			return
+		case parts[1] == "memo" && r.Method == http.MethodPut:
+			s.saveLessonMemo(w, r, lessonID)
+			return
 		}
 	}
 
@@ -478,6 +484,169 @@ ORDER BY ub.earned_at DESC`,
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (s *Server) userLessonProgress(w http.ResponseWriter, r *http.Request) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	rows, err := s.db.Query(
+		`SELECT lesson_id, status FROM user_lesson_progress WHERE user_id = $1`,
+		claims.UserID,
+	)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load lesson progress")
+		return
+	}
+	defer rows.Close()
+
+	items := make([]LessonProgressItem, 0)
+	for rows.Next() {
+		var item LessonProgressItem
+		if err := rows.Scan(&item.LessonID, &item.Status); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan lesson progress")
+			return
+		}
+		items = append(items, item)
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (s *Server) getLessonMemo(w http.ResponseWriter, r *http.Request, lessonID int) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var content string
+	err = s.db.QueryRow(
+		`SELECT content FROM user_lesson_memos WHERE user_id = $1 AND lesson_id = $2`,
+		claims.UserID,
+		lessonID,
+	).Scan(&content)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, http.StatusOK, LessonMemo{LessonID: lessonID, Content: ""})
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load memo")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, LessonMemo{LessonID: lessonID, Content: content})
+}
+
+func (s *Server) saveLessonMemo(w http.ResponseWriter, r *http.Request, lessonID int) {
+	claims, err := s.parseAuth(r)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	_, err = s.db.Exec(
+		`INSERT INTO user_lesson_memos (user_id, lesson_id, content, updated_at)
+VALUES ($1, $2, $3, NOW())
+ON CONFLICT (user_id, lesson_id)
+DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()`,
+		claims.UserID,
+		lessonID,
+		req.Content,
+	)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to save memo")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, LessonMemo{LessonID: lessonID, Content: req.Content})
+}
+
+func (s *Server) getGlossaryTerms(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+
+	var rows interface {
+		Next() bool
+		Scan(...any) error
+		Close() error
+	}
+	var err error
+
+	if q != "" {
+		rows, err = s.db.Query(
+			`SELECT id, term, reading, definition, category FROM glossary_terms
+WHERE term ILIKE $1 OR reading ILIKE $1 OR definition ILIKE $1
+ORDER BY reading, term`,
+			"%"+q+"%",
+		)
+	} else {
+		rows, err = s.db.Query(
+			`SELECT id, term, reading, definition, category FROM glossary_terms ORDER BY reading, term`,
+		)
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load glossary")
+		return
+	}
+	defer rows.Close()
+
+	items := make([]GlossaryTerm, 0)
+	for rows.Next() {
+		var t GlossaryTerm
+		if err := rows.Scan(&t.ID, &t.Term, &t.Reading, &t.Definition, &t.Category); err != nil {
+			writeErr(w, http.StatusInternalServerError, "failed to scan glossary")
+			return
+		}
+		items = append(items, t)
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (s *Server) glossaryRoute(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/glossary/")
+	if idStr == "" {
+		writeErr(w, http.StatusBadRequest, "invalid glossary id")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid id")
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var t GlossaryTerm
+	err = s.db.QueryRow(
+		`SELECT id, term, reading, definition, category FROM glossary_terms WHERE id = $1`,
+		id,
+	).Scan(&t.ID, &t.Term, &t.Reading, &t.Definition, &t.Category)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeErr(w, http.StatusNotFound, "term not found")
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, "failed to load term")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, t)
 }
 
 func isUniqueViolation(err error) bool {
