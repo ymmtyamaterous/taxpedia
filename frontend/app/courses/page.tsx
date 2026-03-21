@@ -4,6 +4,8 @@ import { Header } from "@/components/header";
 import { LevelBadge } from "@/components/level-badge";
 import { getCoursesApi } from "@/lib/api-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function CoursesPage() {
   const { items: courses } = await getCoursesApi();
 
