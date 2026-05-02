@@ -61,6 +61,14 @@ export function LessonViewer({ lesson }: Props) {
         </ReactMarkdown>
       </article>
 
+      <div className="tp-ai-notice">
+        <span className="tp-ai-notice-icon">⚠️</span>
+        <p>
+          このコンテンツは生成AIによって作成されています。内容の正確性については十分ご確認いただき、
+          税務に関する具体的なご判断は税理士等の専門家にご相談ください。
+        </p>
+      </div>
+
       {token && (
         <div className="tp-memo">
           <h3 className="tp-memo-title">📝 メモ</h3>
