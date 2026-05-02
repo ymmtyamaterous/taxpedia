@@ -81,6 +81,14 @@ export function Header() {
         <>
           <div className="tp-mobile-overlay" onClick={closeMenu} aria-hidden="true" />
           <nav className="tp-mobile-menu">
+            <button
+              type="button"
+              className="tp-mobile-menu-close"
+              onClick={closeMenu}
+              aria-label="メニューを閉じる"
+            >
+              ✕
+            </button>
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="tp-mobile-menu-item" onClick={closeMenu}>
                 {item.label}
