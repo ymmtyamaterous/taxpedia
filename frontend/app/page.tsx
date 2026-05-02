@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/header";
+import { useAuth } from "@/components/auth-provider";
 
 // ── Carousel ──────────────────────────────────────────────────────────────────
-function HeroCarousel() {
+function HeroCarousel({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [current, setCurrent] = useState(0);
   const total = 4;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -66,8 +67,12 @@ function HeroCarousel() {
               <strong style={{ color: "var(--green-dark)" }}>登録不要・完全無料</strong>で今すぐ学べます。
             </p>
             <div className="lp-hero-cta">
-              <Link href="/courses" className="lp-btn-main">📖 登録なしで学ぶ</Link>
-              <Link href="/register" className="lp-btn-outline">📌 進捗を記録したい</Link>
+              <Link href="/courses" className="lp-btn-main">📖 コースを学ぶ</Link>
+              {isLoggedIn ? (
+                <Link href="/mypage" className="lp-btn-outline">📊 マイページへ</Link>
+              ) : (
+                <Link href="/register" className="lp-btn-outline">📌 進捗を記録したい</Link>
+              )}
             </div>
             <div className="lp-hero-social-proof">
               <div className="lp-avatars"><span>🧑</span><span>👩</span><span>👨</span><span>🙋</span></div>
@@ -337,13 +342,15 @@ function useReveal() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   useReveal();
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
   return (
     <div>
       <Header />
 
       {/* Hero Carousel */}
-      <HeroCarousel />
+      <HeroCarousel isLoggedIn={isLoggedIn} />
 
       {/* Marquee */}
       <div className="lp-marquee-section">
@@ -567,8 +574,13 @@ export default function Home() {
         <h2>さあ、税金を<br />自分の味方にしよう。</h2>
         <p>登録不要・完全無料。<br />今日から12,000人と一緒に学びはじめませんか？</p>
         <div className="lp-cta-btns">
-          <Link href="/courses" className="lp-btn-cta-main">📖 登録なしで今すぐ学ぶ</Link>
-          <Link href="/register" className="lp-btn-cta-outline">📌 アカウント登録して進捗を記録</Link>
+          <Link href="/courses" className="lp-btn-cta-main">📖 今すぐ学ぶ</Link>
+          {!isLoggedIn && (
+            <Link href="/register" className="lp-btn-cta-outline">📌 アカウント登録して進捗を記録</Link>
+          )}
+          {isLoggedIn && (
+            <Link href="/mypage" className="lp-btn-cta-outline">📊 マイページで進捗を確認</Link>
+          )}
         </div>
         <div className="lp-cta-note">全コンテンツ無料 · クレジットカード不要 · アカウント登録も無料</div>
       </section>
@@ -577,10 +589,14 @@ export default function Home() {
       <footer className="lp-footer">
         <div className="lp-footer-logo">📗 Taxpedia</div>
         <div className="lp-footer-links">
-          <a href="#">利用規約</a>
-          <a href="#">プライバシーポリシー</a>
-          <a href="#">お問い合わせ</a>
-          <a href="#">運営会社</a>
+          <Link href="/terms">利用規約</Link>
+          <Link href="/privacy">プライバシーポリシー</Link>
+          {process.env.NEXT_PUBLIC_CONTACT_URL && (
+            <a href={process.env.NEXT_PUBLIC_CONTACT_URL} target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+          )}
+          {process.env.NEXT_PUBLIC_OPERATOR_URL && (
+            <a href={process.env.NEXT_PUBLIC_OPERATOR_URL} target="_blank" rel="noopener noreferrer">運営者</a>
+          )}
         </div>
         <div className="lp-footer-copy">© 2026 Taxpedia. All rights reserved.</div>
       </footer>

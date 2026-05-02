@@ -86,6 +86,156 @@ a {
   gap: 0.6rem;
 }
 
+/* デスクトップのみ表示 */
+.tp-header-auth--desktop {
+  display: flex;
+}
+
+/* ハンバーガーボタン（モバイルのみ表示） */
+.tp-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+.tp-hamburger:hover {
+  background: var(--green-pale);
+}
+
+.tp-hamburger-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--green-dark);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.tp-hamburger-bar--open-1 {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.tp-hamburger-bar--open-2 {
+  opacity: 0;
+}
+
+.tp-hamburger-bar--open-3 {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* モバイルメニュー背景オーバーレイ */
+.tp-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 15;
+}
+
+/* モバイルメニュー本体 */
+.tp-mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(80vw, 300px);
+  height: 100dvh;
+  background: #fff;
+  border-left: 2px solid var(--green-pale);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 1.5rem 2rem;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.tp-mobile-menu-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.tp-mobile-menu-item:hover {
+  background: var(--green-pale);
+}
+
+.tp-mobile-menu-item--btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: var(--gray);
+}
+
+.tp-mobile-menu-item--btn:hover {
+  background: var(--green-pale);
+  color: var(--ink);
+}
+
+.tp-mobile-menu-item--primary {
+  background: var(--green-main);
+  color: #fff;
+  text-align: center;
+}
+
+.tp-mobile-menu-item--primary:hover {
+  background: var(--green-dark);
+}
+
+.tp-mobile-menu-divider {
+  height: 1px;
+  background: var(--green-pale);
+  margin: 0.5rem 0;
+}
+
+.tp-mobile-menu-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-pale);
+  border: none;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  color: var(--green-dark);
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.tp-mobile-menu-close:hover {
+  background: #c8efd8;
+}
+
+.tp-mobile-menu-user {
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
 .tp-user-name {
   font-size: 0.88rem;
   font-weight: 700;
@@ -550,6 +700,21 @@ a {
   color: var(--gray);
 }
 
+@media (max-width: 768px) {
+  /* モバイルではデスクトップナビ・認証エリアを非表示、ハンバーガーを表示 */
+  .tp-nav {
+    display: none;
+  }
+
+  .tp-header-auth--desktop {
+    display: none;
+  }
+
+  .tp-hamburger {
+    display: flex;
+  }
+}
+
 @media (max-width: 600px) {
   .tp-lesson-hero {
     flex-direction: column;
@@ -664,6 +829,30 @@ a {
   font-size: 0.88rem;
   color: var(--green-dark);
   font-weight: 600;
+}
+
+.tp-ai-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding: 0.9rem 1.1rem;
+  background: #fffbeb;
+  border: 1.5px solid #f0d96a;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #7a5c00;
+  line-height: 1.6;
+}
+
+.tp-ai-notice-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  margin-top: 0.1rem;
+}
+
+.tp-ai-notice p {
+  margin: 0;
 }
 
 .tp-auth {
