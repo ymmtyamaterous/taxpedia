@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
+import { useAuth } from "@/components/auth-provider";
 import { Header } from "@/components/header";
 import { getGlossaryApi } from "@/lib/api-client";
 import type { GlossaryTerm } from "@/lib/auth-types";
 
 export default function GlossaryPage() {
+  const { user } = useAuth();
   const [terms, setTerms] = useState<GlossaryTerm[]>([]);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -39,8 +42,17 @@ export default function GlossaryPage() {
     <div className="tp-page">
       <Header />
       <main className="tp-container">
-        <h1 className="tp-title">用語辞典</h1>
-        <p className="tp-lead">税務・税法に関するキーワードを解説します。</p>
+        <div className="tp-page-heading">
+          <div>
+            <h1 className="tp-title">用語辞典</h1>
+            <p className="tp-lead">税務・税法に関するキーワードを解説します。</p>
+          </div>
+          {user?.role === "admin" && (
+            <Link href="/admin" className="tp-link-btn">
+              用語を管理する
+            </Link>
+          )}
+        </div>
 
         <div className="tp-glossary-search">
           <input

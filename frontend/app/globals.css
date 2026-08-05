@@ -279,6 +279,13 @@ a {
   color: var(--ink);
 }
 
+.tp-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+
 .tp-lead {
   color: var(--gray);
   margin-top: 0.8rem;
