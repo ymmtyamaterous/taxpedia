@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"flag"
 	"log"
-	"os"
 
 	_ "github.com/lib/pq"
+	"github.com/ymmtyamaterous/taxpedia-api/internal/config"
 	"github.com/ymmtyamaterous/taxpedia-api/internal/migrate"
 )
 
@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("usage: go run ./cmd/migrate [up|down]")
 	}
 
-	databaseURL := os.Getenv("DATABASE_URL")
+	databaseURL := config.Load().DatabaseURL
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL is required")
 	}

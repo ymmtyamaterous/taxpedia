@@ -4,7 +4,7 @@ const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
   "http://localhost:8080";
 
-type HttpMethod = "GET" | "POST" | "PUT";
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 async function request<T>(
   path: string,
@@ -37,6 +37,10 @@ async function request<T>(
       // no-op
     }
     throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   const data: unknown = await response.json();
@@ -160,4 +164,61 @@ export async function getGlossaryApi(q?: string): Promise<{ items: GlossaryTerm[
 
 export async function getGlossaryTermApi(id: number): Promise<GlossaryTerm> {
   return request<GlossaryTerm>(`/api/glossary/${id}`, "GET");
+}
+
+export type CourseInput = {
+  title: string;
+  description: string;
+  level: Course["level"];
+  orderIndex: number;
+};
+
+export type LessonInput = {
+  courseId: number;
+  title: string;
+  content: string;
+  estimatedMinutes: number;
+  orderIndex: number;
+};
+
+export type GlossaryInput = Omit<GlossaryTerm, "id">;
+
+export async function getAdminCoursesApi(token: string): Promise<{ items: Course[] }> {
+  return request<{ items: Course[] }>("/api/admin/courses", "GET", undefined, token);
+}
+
+export async function createCourseApi(input: CourseInput, token: string): Promise<Course> {
+  return request<Course>("/api/admin/courses", "POST", input, token);
+}
+
+export async function updateCourseApi(id: number, input: CourseInput, token: string): Promise<Course> {
+  return request<Course>(`/api/admin/courses/${id}`, "PUT", input, token);
+}
+
+export async function deleteCourseApi(id: number, token: string): Promise<void> {
+  await request<undefined>(`/api/admin/courses/${id}`, "DELETE", undefined, token);
+}
+
+export async function createLessonApi(input: LessonInput, token: string): Promise<Lesson> {
+  return request<Lesson>("/api/admin/lessons", "POST", input, token);
+}
+
+export async function updateLessonApi(id: number, input: LessonInput, token: string): Promise<Lesson> {
+  return request<Lesson>(`/api/admin/lessons/${id}`, "PUT", input, token);
+}
+
+export async function deleteLessonApi(id: number, token: string): Promise<void> {
+  await request<undefined>(`/api/admin/lessons/${id}`, "DELETE", undefined, token);
+}
+
+export async function createGlossaryTermApi(input: GlossaryInput, token: string): Promise<GlossaryTerm> {
+  return request<GlossaryTerm>("/api/admin/glossary", "POST", input, token);
+}
+
+export async function updateGlossaryTermApi(id: number, input: GlossaryInput, token: string): Promise<GlossaryTerm> {
+  return request<GlossaryTerm>(`/api/admin/glossary/${id}`, "PUT", input, token);
+}
+
+export async function deleteGlossaryTermApi(id: number, token: string): Promise<void> {
+  await request<undefined>(`/api/admin/glossary/${id}`, "DELETE", undefined, token);
 }

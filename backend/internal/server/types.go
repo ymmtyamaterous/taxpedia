@@ -5,6 +5,7 @@ type Course struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Level       string `json:"level"`
+	OrderIndex  int    `json:"orderIndex"`
 }
 
 type Lesson struct {
@@ -13,6 +14,7 @@ type Lesson struct {
 	Title           string `json:"title"`
 	Content         string `json:"content"`
 	EstimatedMinute int    `json:"estimatedMinutes"`
+	OrderIndex      int    `json:"orderIndex"`
 }
 
 type QuizChoice struct {
@@ -40,6 +42,7 @@ type User struct {
 	ID          int    `json:"id"`
 	Email       string `json:"email"`
 	DisplayName string `json:"displayName"`
+	Role        string `json:"role"`
 }
 type LessonProgressItem struct {
 	LessonID int    `json:"lessonId"`

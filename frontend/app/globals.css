@@ -338,6 +338,91 @@ a {
   flex-wrap: wrap;
 }
 
+.tp-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.tp-admin-tab {
+  border: 2px solid var(--green-pale);
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--green-dark);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.55rem 1rem;
+}
+
+.tp-admin-tab--active {
+  background: var(--green-main);
+  border-color: var(--green-main);
+  color: #fff;
+}
+
+.tp-admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.tp-admin-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.tp-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.tp-form h2,
+.tp-admin-list h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.tp-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--green-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.tp-form input,
+.tp-form select,
+.tp-form textarea {
+  width: 100%;
+  border: 2px solid var(--green-pale);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  padding: 0.6rem 0.7rem;
+}
+
+.tp-form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.tp-form .tp-admin-textarea {
+  min-height: 14rem;
+}
+
+.tp-notice {
+  margin: 1rem 0;
+  border-radius: 10px;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+}
+
 .tp-primary-btn,
 .tp-link-btn,
 .tp-danger-btn {

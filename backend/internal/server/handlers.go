@@ -19,7 +19,7 @@ func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) getCourses(w http.ResponseWriter, _ *http.Request) {
-	rows, err := s.db.Query(`SELECT id, title, description, level FROM courses ORDER BY order_index, id`)
+	rows, err := s.db.Query(`SELECT id, title, description, level, order_index FROM courses ORDER BY order_index, id`)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "failed to load courses")
 		return
@@ -29,7 +29,7 @@ func (s *Server) getCourses(w http.ResponseWriter, _ *http.Request) {
 	items := make([]Course, 0)
 	for rows.Next() {
 		var c Course
-		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Level); err != nil {
+		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Level, &c.OrderIndex); err != nil {
 			writeErr(w, http.StatusInternalServerError, "failed to scan courses")
 			return
 		}
@@ -72,11 +72,12 @@ func (s *Server) courseRoute(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getCourseByID(w http.ResponseWriter, courseID int) {
 	var c Course
-	err := s.db.QueryRow(`SELECT id, title, description, level FROM courses WHERE id = $1`, courseID).Scan(
+	err := s.db.QueryRow(`SELECT id, title, description, level, order_index FROM courses WHERE id = $1`, courseID).Scan(
 		&c.ID,
 		&c.Title,
 		&c.Description,
 		&c.Level,
+		&c.OrderIndex,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeErr(w, http.StatusNotFound, "course not found")
@@ -91,7 +92,7 @@ func (s *Server) getCourseByID(w http.ResponseWriter, courseID int) {
 
 func (s *Server) getCourseLessons(w http.ResponseWriter, courseID int) {
 	rows, err := s.db.Query(
-		`SELECT id, course_id, title, content, estimated_minutes FROM lessons WHERE course_id = $1 ORDER BY order_index, id`,
+		`SELECT id, course_id, title, content, estimated_minutes, order_index FROM lessons WHERE course_id = $1 ORDER BY order_index, id`,
 		courseID,
 	)
 	if err != nil {
@@ -103,7 +104,7 @@ func (s *Server) getCourseLessons(w http.ResponseWriter, courseID int) {
 	items := make([]Lesson, 0)
 	for rows.Next() {
 		var l Lesson
-		if err := rows.Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute); err != nil {
+		if err := rows.Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute, &l.OrderIndex); err != nil {
 			writeErr(w, http.StatusInternalServerError, "failed to scan lessons")
 			return
 		}
@@ -181,9 +182,9 @@ func (s *Server) lessonRoute(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getLessonByID(w http.ResponseWriter, lessonID int) {
 	var l Lesson
 	err := s.db.QueryRow(
-		`SELECT id, course_id, title, content, estimated_minutes FROM lessons WHERE id = $1`,
+		`SELECT id, course_id, title, content, estimated_minutes, order_index FROM lessons WHERE id = $1`,
 		lessonID,
-	).Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute)
+	).Scan(&l.ID, &l.CourseID, &l.Title, &l.Content, &l.EstimatedMinute, &l.OrderIndex)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeErr(w, http.StatusNotFound, "lesson not found")
 		return
@@ -271,11 +272,11 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	err = s.db.QueryRow(
-		`INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3) RETURNING id, email, display_name`,
+		`INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3) RETURNING id, email, display_name, role`,
 		req.Email,
 		string(hashed),
 		req.DisplayName,
-	).Scan(&user.ID, &user.Email, &user.DisplayName)
+	).Scan(&user.ID, &user.Email, &user.DisplayName, &user.Role)
 	if err != nil {
 		if isUniqueViolation(err) {
 			writeErr(w, http.StatusConflict, "email already exists")
@@ -286,7 +287,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.issueToken(int64(user.ID), user.Email)
+	token, err := s.issueToken(int64(user.ID), user.Email, user.Role)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "failed to issue token")
 		return
@@ -311,9 +312,9 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var passwordHash string
 	err := s.db.QueryRow(
-		`SELECT id, email, display_name, password_hash FROM users WHERE email = $1`,
+		`SELECT id, email, display_name, role, password_hash FROM users WHERE email = $1`,
 		req.Email,
-	).Scan(&user.ID, &user.Email, &user.DisplayName, &passwordHash)
+	).Scan(&user.ID, &user.Email, &user.DisplayName, &user.Role, &passwordHash)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeErr(w, http.StatusUnauthorized, "invalid credentials")
 		return
@@ -328,7 +329,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.issueToken(int64(user.ID), user.Email)
+	token, err := s.issueToken(int64(user.ID), user.Email, user.Role)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "failed to issue token")
 		return
@@ -348,10 +349,11 @@ func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user User
-	err = s.db.QueryRow(`SELECT id, email, display_name FROM users WHERE id = $1`, claims.UserID).Scan(
+	err = s.db.QueryRow(`SELECT id, email, display_name, role FROM users WHERE id = $1`, claims.UserID).Scan(
 		&user.ID,
 		&user.Email,
 		&user.DisplayName,
+		&user.Role,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeErr(w, http.StatusUnauthorized, "user not found")

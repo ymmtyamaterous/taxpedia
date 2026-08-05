@@ -42,6 +42,12 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/users/me/lesson-progress", s.userLessonProgress)
 	s.mux.HandleFunc("GET /api/glossary", s.getGlossaryTerms)
 	s.mux.HandleFunc("/api/glossary/", s.glossaryRoute)
+	s.mux.HandleFunc("/api/admin/courses", s.adminCoursesRoute)
+	s.mux.HandleFunc("/api/admin/courses/", s.adminCourseRoute)
+	s.mux.HandleFunc("/api/admin/lessons", s.adminLessonsRoute)
+	s.mux.HandleFunc("/api/admin/lessons/", s.adminLessonRoute)
+	s.mux.HandleFunc("/api/admin/glossary", s.adminGlossaryRoute)
+	s.mux.HandleFunc("/api/admin/glossary/", s.adminGlossaryTermRoute)
 }
 
 func withCORS(next http.Handler, allowedOrigins string) http.Handler {

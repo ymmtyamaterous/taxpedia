@@ -13,6 +13,7 @@ tags:
 	- name: Quiz
 	- name: Users
 	- name: Glossary
+	- name: Admin
 paths:
 	/api/health:
 		get:
@@ -355,6 +356,103 @@ paths:
 						application/json:
 							schema:
 								$ref: "#/components/schemas/GlossaryTerm"
+	/api/admin/courses:
+		get:
+			tags: [Admin]
+			summary: 管理用コース一覧
+			security: [{ bearerAuth: [] }]
+			responses:
+				"200":
+					description: OK
+		post:
+			tags: [Admin]
+			summary: コース作成
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/CourseInput" }
+			responses:
+				"201": { description: Created }
+	/api/admin/courses/{id}:
+		put:
+			tags: [Admin]
+			summary: コース更新
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/CourseInput" }
+			responses:
+				"200": { description: OK }
+		delete:
+			tags: [Admin]
+			summary: コース削除
+			security: [{ bearerAuth: [] }]
+			responses:
+				"204": { description: No Content }
+	/api/admin/lessons:
+		post:
+			tags: [Admin]
+			summary: レッスン作成
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/LessonInput" }
+			responses:
+				"201": { description: Created }
+	/api/admin/lessons/{id}:
+		put:
+			tags: [Admin]
+			summary: レッスン更新
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/LessonInput" }
+			responses:
+				"200": { description: OK }
+		delete:
+			tags: [Admin]
+			summary: レッスン削除
+			security: [{ bearerAuth: [] }]
+			responses:
+				"204": { description: No Content }
+	/api/admin/glossary:
+		post:
+			tags: [Admin]
+			summary: 用語作成
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/GlossaryInput" }
+			responses:
+				"201": { description: Created }
+	/api/admin/glossary/{id}:
+		put:
+			tags: [Admin]
+			summary: 用語更新
+			security: [{ bearerAuth: [] }]
+			requestBody:
+				required: true
+				content:
+					application/json:
+						schema: { $ref: "#/components/schemas/GlossaryInput" }
+			responses:
+				"200": { description: OK }
+		delete:
+			tags: [Admin]
+			summary: 用語削除
+			security: [{ bearerAuth: [] }]
+			responses:
+				"204": { description: No Content }
 components:
 	securitySchemes:
 		bearerAuth:
@@ -406,7 +504,10 @@ components:
 					type: string
 				displayName:
 					type: string
-			required: [id, email, displayName]
+				role:
+					type: string
+					enum: [user, admin]
+			required: [id, email, displayName, role]
 		Course:
 			type: object
 			properties:
@@ -419,7 +520,9 @@ components:
 				level:
 					type: string
 					enum: [beginner, intermediate, advanced]
-			required: [id, title, description, level]
+				orderIndex:
+					type: integer
+			required: [id, title, description, level, orderIndex]
 		Lesson:
 			type: object
 			properties:
@@ -433,7 +536,9 @@ components:
 					type: string
 				estimatedMinutes:
 					type: integer
-			required: [id, courseId, title, content, estimatedMinutes]
+				orderIndex:
+					type: integer
+			required: [id, courseId, title, content, estimatedMinutes, orderIndex]
 		QuizChoice:
 			type: object
 			properties:
@@ -495,7 +600,8 @@ components:
 					type: integer
 				earnedBadges:
 					type: integer
-			required: [completedCourses, streakDays, earnedBadges]		LessonMemo:
+				required: [completedCourses, streakDays, earnedBadges]
+		LessonMemo:
 			type: object
 			properties:
 				lessonId:
@@ -526,3 +632,28 @@ components:
 				category:
 					type: string
 			required: [id, term, reading, definition, category]
+		CourseInput:
+			type: object
+			properties:
+				title: { type: string }
+				description: { type: string }
+				level: { type: string, enum: [beginner, intermediate, advanced] }
+				orderIndex: { type: integer }
+			required: [title, description, level]
+		LessonInput:
+			type: object
+			properties:
+				courseId: { type: integer }
+				title: { type: string }
+				content: { type: string }
+				estimatedMinutes: { type: integer, minimum: 1 }
+				orderIndex: { type: integer }
+			required: [courseId, title, content, estimatedMinutes]
+		GlossaryInput:
+			type: object
+			properties:
+				term: { type: string }
+				reading: { type: string }
+				definition: { type: string }
+				category: { type: string }
+			required: [term, definition]

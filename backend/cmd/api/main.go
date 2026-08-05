@@ -37,6 +37,15 @@ func main() {
 	}
 
 	srv := server.New(cfg.AllowedOrigins, db, cfg.JWTSecret)
+	if cfg.AdminEmail != "" || cfg.AdminPassword != "" {
+		if cfg.AdminEmail == "" || cfg.AdminPassword == "" {
+			log.Fatal("ADMIN_EMAIL and ADMIN_PASSWORD must both be set")
+		}
+		if err := srv.EnsureAdmin(cfg.AdminEmail, cfg.AdminPassword); err != nil {
+			log.Fatalf("failed to create administrator: %v", err)
+		}
+		log.Printf("administrator account is ready for %s", cfg.AdminEmail)
+	}
 
 	log.Printf("Taxpedia API listening on %s", cfg.Addr())
 	if err := http.ListenAndServe(cfg.Addr(), srv.Handler()); err != nil {

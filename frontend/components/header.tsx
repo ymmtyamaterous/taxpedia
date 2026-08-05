@@ -31,7 +31,7 @@ export function Header() {
         >
           ✕
         </button>
-        {navItems.map((item) => (
+        {navItems.concat(user?.role === "admin" ? [{ href: "/admin", label: "管理" }] : []).map((item) => (
           <Link key={item.href} href={item.href} className="tp-mobile-menu-item" onClick={closeMenu}>
             {item.label}
           </Link>
@@ -71,7 +71,7 @@ export function Header() {
 
         {/* デスクトップナビ */}
         <nav className="tp-nav">
-          {navItems.map((item) => (
+          {navItems.concat(user?.role === "admin" ? [{ href: "/admin", label: "管理" }] : []).map((item) => (
             <Link key={item.href} href={item.href}>
               {item.label}
             </Link>

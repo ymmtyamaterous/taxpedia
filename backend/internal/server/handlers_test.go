@@ -120,3 +120,51 @@ func TestRegister_DuplicateEmail(t *testing.T) {
 		t.Errorf("status = %d, want %d", w2.Code, http.StatusConflict)
 	}
 }
+
+func TestAdminEndpoints_RequireAdministrator(t *testing.T) {
+	srv := server.NewTestServer(t)
+
+	registerBody := bytes.NewBufferString(`{"email":"member@example.com","password":"password123","displayName":"Member"}`)
+	registerReq := httptest.NewRequest(http.MethodPost, "/api/auth/register", registerBody)
+	registerW := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(registerW, registerReq)
+
+	var memberResponse struct {
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(registerW.Body.Bytes(), &memberResponse); err != nil {
+		t.Fatalf("parse register response: %v", err)
+	}
+
+	memberReq := httptest.NewRequest(http.MethodGet, "/api/admin/courses", nil)
+	memberReq.Header.Set("Authorization", "Bearer "+memberResponse.Token)
+	memberW := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(memberW, memberReq)
+	if memberW.Code != http.StatusForbidden {
+		t.Errorf("member status = %d, want %d", memberW.Code, http.StatusForbidden)
+	}
+
+	if err := srv.EnsureAdmin("admin@example.com", "admin-password"); err != nil {
+		t.Fatalf("EnsureAdmin: %v", err)
+	}
+	loginReq := httptest.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewBufferString(`{"email":"admin@example.com","password":"admin-password"}`))
+	loginW := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(loginW, loginReq)
+	if loginW.Code != http.StatusOK {
+		t.Fatalf("admin login status = %d, want %d", loginW.Code, http.StatusOK)
+	}
+	var adminResponse struct {
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(loginW.Body.Bytes(), &adminResponse); err != nil {
+		t.Fatalf("parse login response: %v", err)
+	}
+
+	adminReq := httptest.NewRequest(http.MethodGet, "/api/admin/courses", nil)
+	adminReq.Header.Set("Authorization", "Bearer "+adminResponse.Token)
+	adminW := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(adminW, adminReq)
+	if adminW.Code != http.StatusOK {
+		t.Errorf("admin status = %d, want %d", adminW.Code, http.StatusOK)
+	}
+}

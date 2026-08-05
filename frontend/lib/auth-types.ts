@@ -5,6 +5,7 @@ export type Course = {
   title: string;
   description: string;
   level: CourseLevel;
+  orderIndex?: number;
 };
 
 export type Lesson = {
@@ -13,6 +14,7 @@ export type Lesson = {
   title: string;
   content: string;
   estimatedMinutes: number;
+  orderIndex?: number;
 };
 
 export type QuizChoice = {
@@ -33,6 +35,7 @@ export type AuthUser = {
   id: number;
   email: string;
   displayName: string;
+  role: "user" | "admin";
 };
 
 export type AuthResponse = {
